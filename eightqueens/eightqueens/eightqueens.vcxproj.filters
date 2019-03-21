@@ -19,4 +19,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="E:\output.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="E:\solutions array generator.py" />
+  </ItemGroup>
 </Project>
