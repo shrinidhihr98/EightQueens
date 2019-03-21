@@ -36,13 +36,28 @@ void drawcell(int x, int y, int increment){
 }
 
 void highlightCell(){
+	int right = left + (size * increment);
+	int top = bottom + (size * increment);
 
 	int cellx = mouse_x / 50;
 	int celly = mouse_y / 50;
-	printf("HighlightCell():\n\tMouse_x, mouse_y: %d,%d\n\tHighlighted cell: %d,%d\n", mouse_x,mouse_y,cellx, celly);
-	int x = (cellx* increment);
-	int y = (celly * increment);
-	drawcell(x, y, increment);
+
+	int cellxindex = cellx - 2; 
+	int cellyindex = celly - 2;
+	printf("HighlightCell():\n\tMouse_x, mouse_y: %d,%d\n\tHighlighted cell wrt window: %d,%d\n", mouse_x,mouse_y,cellxindex, cellyindex);
+
+	int x =  (cellx* increment);
+	int y =  (celly * increment);
+
+	
+
+	if (x >= left && x < right && y >= bottom && y < top){
+		drawcell(x, y, increment);		
+	}
+	else{
+		printf("Grid left, bottom, top, right: %d, %d, %d, %d\n", left, bottom, top, right);
+		printf("Cannot highlight: Mouse at %d,%d clicked outside grid!\n",x,y);
+	}
 }
 
 void drawgrid(int increment){
