@@ -70,26 +70,26 @@ void drawgrid(){
 
 /*
 void highlightCell(){
-	int right = left + (size * increment);
-	int top = bottom + (size * increment);
+int right = left + (size * increment);
+int top = bottom + (size * increment);
 
-	int cellx = mouse_x / increment;
-	int celly = mouse_y / increment;
+int cellx = mouse_x / increment;
+int celly = mouse_y / increment;
 
-	int cellxindex = cellx - 2; 
-	int cellyindex = celly - 2;
-	printf("HighlightCell():\n\tMouse_x, mouse_y: %d,%d\n\tHighlighted cell wrt window: %d,%d\n", mouse_x,mouse_y,cellxindex, cellyindex);
+int cellxindex = cellx - 2;
+int cellyindex = celly - 2;
+printf("HighlightCell():\n\tMouse_x, mouse_y: %d,%d\n\tHighlighted cell wrt window: %d,%d\n", mouse_x,mouse_y,cellxindex, cellyindex);
 
-	int x =  (cellx* increment);
-	int y =  (celly * increment);	
+int x =  (cellx* increment);
+int y =  (celly * increment);
 
-	if (x >= left && x < right && y >= bottom && y < top){
-		drawcell(x, y);		
-	}
-	else{
-		printf("Grid left, bottom, top, right: %d, %d, %d, %d\n", left, bottom, top, right);
-		printf("Cannot highlight: Mouse at %d,%d clicked outside grid!\n",x,y);
-	}
+if (x >= left && x < right && y >= bottom && y < top){
+drawcell(x, y);
+}
+else{
+printf("Grid left, bottom, top, right: %d, %d, %d, %d\n", left, bottom, top, right);
+printf("Cannot highlight: Mouse at %d,%d clicked outside grid!\n",x,y);
+}
 }
 
 */
@@ -97,10 +97,10 @@ void highlightCell(int i, int j){
 	int right = left + (size * increment);
 	int top = bottom + (size * increment);
 
-	printf("HighlightCell():\n\tMouse_x, mouse_y: %d,%d\n\tHighlighted cell wrt window: %d,%d\n", mouse_x, mouse_y, i,j);
+	printf("HighlightCell():\n\tMouse_x, mouse_y: %d,%d\n\tHighlighted cell wrt window: %d,%d\n", mouse_x, mouse_y, i, j);
 
-	int x = (i+2) * increment; //Gets bottom left corner of cell. Using +2, because window size magic.
-	int y = (j+2) * increment;
+	int x = (i + 2) * increment; //Gets bottom left corner of cell. Using +2, because window size magic.
+	int y = (j + 2) * increment;
 
 	if (x >= left && x < right && y >= bottom && y < top){
 		drawcell(x, y);
@@ -114,8 +114,8 @@ void highlightCell(int i, int j){
 int findSolutionNumber(int x, int y){
 	for (int solNumber = 0; solNumber < 92; solNumber++){
 		if (solutions[solNumber][x][y] == 1){
-			printf("Solution found! x,y: %d,%d found in Solution number:%d\n", x,y,solNumber);
-			return solNumber;			
+			printf("Solution found! x,y: %d,%d found in Solution number:%d\n", x, y, solNumber);
+			return solNumber;
 		}
 	}
 	printf("Solution not found! Returning 0");
@@ -135,7 +135,7 @@ void hightlight_solution(void){
 
 
 	if (cellxindex >= 0 && cellxindex < 8 && cellyindex >= 0 && cellyindex < 8){
-	int matchesSolution = findSolutionNumber(cellxindex, cellyindex);
+		int matchesSolution = findSolutionNumber(cellxindex, cellyindex);
 		for (int i = 0; i < 8; i++){
 			for (int j = 0; j < 8; j++){
 				if (solutions[matchesSolution][i][j] == 1)
@@ -147,7 +147,7 @@ void hightlight_solution(void){
 
 
 void mouse(int button, int state, int x, int y){
-	
+
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
 		actualmousex = x;
 		actualmousey = y;
@@ -158,7 +158,7 @@ void mouse(int button, int state, int x, int y){
 		}
 		printf("Left Mouse button clicked! x,y: %d,%d\n", mouse_x, mouse_y);
 		printf("Mouse Coordinates are: %d,%d", x, y);
-		
+
 	}
 	glutPostRedisplay();
 }
@@ -168,7 +168,7 @@ void translatequeen(){
 	int top = bottom + (size * increment);
 
 	int cellx = mouse_x / increment;
-	int celly = mouse_y	/ increment;
+	int celly = mouse_y / increment;
 
 	int cellxindex = cellx - 2;
 	int cellyindex = celly - 2;
@@ -180,14 +180,14 @@ void translatequeen(){
 
 	requiredx = x;
 	requiredy = y;
-	
+
 	drawcell(cell_left, cell_bottom);
 	glTranslatef(move_right, move_up, 0);
 	printf("Starting queenposition: x,y: %d,%d\n\tEnding queen position: x,y, %d,%d", queen_position_x, queen_position_y, x, y);
 	glPushMatrix();
 	glLoadIdentity();
 	drawgrid();
-	
+
 	glPopMatrix();
 
 	/*
@@ -204,28 +204,28 @@ void translatequeen(){
 	printf("Starting queenposition: x,y: %d,%d\n\tEnding queen position: x,y, %d,%d", queen_position_x, queen_position_y, x, y);
 	/*
 	while (queen_position_x < x){
-		glPushMatrix();
-		glLoadIdentity();
-		drawcell(queen_position_x, queen_position_y);
-		glTranslatef(0.01,0,0);
-		glPopMatrix();
-		queen_position_x += 0.01;
+	glPushMatrix();
+	glLoadIdentity();
+	drawcell(queen_position_x, queen_position_y);
+	glTranslatef(0.01,0,0);
+	glPopMatrix();
+	queen_position_x += 0.01;
 	}
-	
+
 	while (queen_position_y < y){
-		glPushMatrix();
-		glLoadIdentity();
-		drawcell(queen_position_x, queen_position_y);
-		glTranslatef(0, 0.01, 0);
-		glPopMatrix();
-		queen_position_y += 0.01;
+	glPushMatrix();
+	glLoadIdentity();
+	drawcell(queen_position_x, queen_position_y);
+	glTranslatef(0, 0.01, 0);
+	glPopMatrix();
+	queen_position_y += 0.01;
 	}
 	*/
 
 }
 
 void timer(int t){
-	
+
 	if (queen_position_x < requiredx){
 		cell_left += 1;
 		move_right = 1;
@@ -236,7 +236,8 @@ void timer(int t){
 	if (queen_position_y < requiredy && move_right == 0){
 		cell_bottom += 1;
 		move_up = 1;
-	}else {
+	}
+	else {
 		move_up = 0;
 	}
 }
@@ -252,11 +253,11 @@ void display(void){
 	//drawgrid(50);
 
 	printf("Display():\n\tActual Mousex, ActualMousey: %d,%d\n", actualmousex, actualmousey);
-	
+
 	//hightlight_solution();
 	translatequeen();
 	glFlush();
-	
+
 	printf("=========================================================\n");
 }
 
@@ -282,22 +283,22 @@ DON'T USE GLOBAL VARIABLES FOR EVERYTHING.
 Todo:
 
 
-#Program does not handle window resizing. 
+#Program does not handle window resizing.
 #To search for multiple solutions and display them all.
 #To place queens at the origin, and then move them to the respective places, first along x, and then along y.
 #First stage:
-	Order:
-		Place first queen immediately as user clicks on a valid cell. Overlap remaining 7 queens at window origin. Move the queens one by one,
-		(remember to skip the currently placed ones), and final queen should not leave any trace. Queens first move along x, then along y.
+Order:
+Place first queen immediately as user clicks on a valid cell. Overlap remaining 7 queens at window origin. Move the queens one by one,
+(remember to skip the currently placed ones), and final queen should not leave any trace. Queens first move along x, then along y.
 #Second stage:
-	User places a few queens in the first few selections. On cell selection, queens move from the origin
-	
-	When conflicting queens are added, the current queen turns red, and translates, along x, and then along y (is diagonal, or z possible?), 
-	moves over to the conflicting queen and kills it, and translates back to original position. After no more choices are left, the computer
-	automatically places the remaining queens. 
-	This requires, that the final choice is actually solvable, so, you need to provide a hint as to
-	what can be the next possible placement. Give multiple hints, so as to give choices to the user. 
-	Any cell not hinted also can be selected, but should not lead to conflicts later. Figure out if this is doable.
+User places a few queens in the first few selections. On cell selection, queens move from the origin
 
-	The program will be sufficiently complex after the second is implemented.
+When conflicting queens are added, the current queen turns red, and translates, along x, and then along y (is diagonal, or z possible?),
+moves over to the conflicting queen and kills it, and translates back to original position. After no more choices are left, the computer
+automatically places the remaining queens.
+This requires, that the final choice is actually solvable, so, you need to provide a hint as to
+what can be the next possible placement. Give multiple hints, so as to give choices to the user.
+Any cell not hinted also can be selected, but should not lead to conflicts later. Figure out if this is doable.
+
+The program will be sufficiently complex after the second is implemented.
 */

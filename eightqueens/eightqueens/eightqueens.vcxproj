@@ -79,6 +79,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="gridDrawer.c" />
+    <ClCompile Include="Source.c" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="E:\output.txt" />
