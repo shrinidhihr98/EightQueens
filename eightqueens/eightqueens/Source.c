@@ -1,3 +1,4 @@
+/*
 #include<Windows.h>
 #include<GL/glut.h>
 #include<stdio.h>
@@ -91,8 +92,8 @@ printf("Grid left, bottom, top, right: %d, %d, %d, %d\n", left, bottom, top, rig
 printf("Cannot highlight: Mouse at %d,%d clicked outside grid!\n",x,y);
 }
 }
-
 */
+/*
 void highlightCell(int i, int j){
 	int right = left + (size * increment);
 	int top = bottom + (size * increment);
@@ -201,6 +202,7 @@ void translatequeen(){
 	queen_position_x += 0.25;
 	//}
 	*/
+	/*
 	printf("Starting queenposition: x,y: %d,%d\n\tEnding queen position: x,y, %d,%d", queen_position_x, queen_position_y, x, y);
 	/*
 	while (queen_position_x < x){
@@ -221,7 +223,7 @@ void translatequeen(){
 	queen_position_y += 0.01;
 	}
 	*/
-
+/*
 }
 
 void timer(int t){
@@ -302,3 +304,4 @@ Any cell not hinted also can be selected, but should not lead to conflicts later
 
 The program will be sufficiently complex after the second is implemented.
 */
+
