@@ -64,6 +64,14 @@ int* indexToCoordinate(int i, int j){
 	return a;
 }
 
+//Converts Window Coordinates to cell indexes.
+int* coordinateToIndex(int i, int j){
+	static int a[2]; //Static has to be use, as C does not advocate to return the address of a local variable to outside of the function.
+	a[0] = (i / grid_increment) - 2; //Gets bottom left corner of cell. Using +2, because window size magic.
+	a[1] = (j / grid_increment) - 2;
+	return a;
+}
+
 
 //Takes in coordinate points, draws lines. WORKS
 void drawline(int x1, int y1, int x2, int y2){
@@ -130,74 +138,54 @@ void showCurrentCells(){
 }
 
 void translatequeen(int i, int j){
-	if (i == current_queen){
-		printf("TranslateQueen(): Translating queen %d to cell i,j: %d,%d \n", current_queen, i, j);
-		int grid_right = grid_left + (8 * grid_increment);
-		int grid_top = grid_bottom + (8 * grid_increment);
-
-
-		int target_position_x = indexToCoordinate(i, j)[0];
-		int target_position_y = indexToCoordinate(i, j)[1];
-
-
-		//The following code moves the queen on click.
-		if (queen_position_x < target_position_x){
-			queen_position_x += 1;
-			move_right = 1;
-
-		}
-		else{
-			printf("Move right set to zero!\n");
-			move_right = 0;
-		}
-		if (queen_position_y < target_position_y && move_right == 0){
-			queen_position_y += 1;
-			move_up = 1;
-		}
-		else {
-			move_up = 0;
-		}
-
-		if ((move_right == 1) | (move_up == 1)){
-			glutPostRedisplay();
-		}
-
-		drawcell(queen_position_x, queen_position_y);
-
-		printf("\tStarting queenposition: x,y: %d,%d\n\tEnding queen position: x,y, %d,%d\n", queen_position_x, queen_position_y, target_position_x, target_position_y);
-		glPushMatrix();
-		glLoadIdentity();
-		showCurrentCells();
-		drawgrid();
-		glTranslatef(move_right, move_up, 0);
-
-		glPopMatrix();
-
-		if ((move_right == 0) && (move_up == 0)){
-			printf("Wait[%d] set to zero!\n", i);
-			wait[i] = 0;
-			queen_position_x = 0;
-			queen_position_y = 0;
-			current_queen++;
-		}
-
-	}
-
-}
-
-void hightlight_solution(void){
+	printf("TranslateQueen(): Translating queen %d to cell i,j: %d,%d \n", current_queen, i, j);
 	int grid_right = grid_left + (8 * grid_increment);
 	int grid_top = grid_bottom + (8 * grid_increment);
 
-	int cellxindex = (mouse_x / grid_increment) - 2; //Subtraction by 2, to adjust for cell_left and cell_bottom
-	int cellyindex = (mouse_y / grid_increment) - 2;
 
-	int k = 0;
-	if (cellxindex >= 0 && cellxindex < 8 && cellyindex >= 0 && cellyindex < 8){
-		int matchesSolution = findSolutionNumber(cellxindex, cellyindex); //findSolutionNumber initializes current solution.
-		for (int i = 0; i < 8; i++){
-			translatequeen(i, current_solution[i][1]);
-		}
+	int target_position_x = indexToCoordinate(i, j)[0];
+	int target_position_y = indexToCoordinate(i, j)[1];
+
+
+	//The following code moves the queen on click.
+	if (queen_position_x < target_position_x){
+		queen_position_x += 1;
+		move_right = 1;
+
+	}
+	else{
+		printf("Move right set to zero!\n");
+		move_right = 0;
+	}
+	if (queen_position_y < target_position_y && move_right == 0){
+		queen_position_y += 1;
+		move_up = 1;
+	}
+	else {
+		move_up = 0;
+	}
+
+	if ((move_right == 1) | (move_up == 1)){
+		glutPostRedisplay();
+	}
+
+	drawcell(queen_position_x, queen_position_y);
+
+	printf("\tStarting queenposition: x,y: %d,%d\n\tEnding queen position: x,y, %d,%d\n", queen_position_x, queen_position_y, target_position_x, target_position_y);
+	glPushMatrix();
+	glLoadIdentity();
+	//showCurrentCells();
+	drawgrid();
+	glTranslatef(move_right, move_up, 0);
+
+	glPopMatrix();
+
+	if ((move_right == 0) && (move_up == 0)){
+		printf("Wait[%d] set to zero!\n", i);
+		wait[i] = 0;
+		queen_position_x = 0;
+		queen_position_y = 0;
+		current_queen++;
 	}
 
 }
@@ -210,7 +198,8 @@ void display(void){
 
 	glColor3f(0, 1, 0);
 	drawgrid();
-	hightlight_solution();
+	translatequeen(coordinateToIndex(mouse_x, mouse_y)[0], coordinateToIndex(mouse_x, mouse_y)[1]);
+	//translatequeen(3,3);
 	glFlush();
 
 	printf("=========================================================\n");
@@ -244,34 +233,5 @@ void main(int argc, char **argv){
 	glMatrixMode(GL_MODELVIEW);
 	glutDisplayFunc(display);
 	glutMouseFunc(mouse);
-
 	glutMainLoop();
 }
-
-/*
-Todo:
-
-
-#Program does not handle window resizing.
-#To search for multiple solutions and display them all.
-#To place queens at the origin, and then move them to the respective places, first along x, and then along y.
-
-#First stage:
-Order:
-Place first queen immediately as user clicks on a valid cell. Overlap remaining 7 queens at window origin. Move the queens one by one,
-(remember to skip the currently placed ones), and final queen should not leave any trace. Queens first move along x, then along y.
-
-STAGE 1 COMPLETED!!!!!!!!!
-
-#Second stage:
-User places a few queens in the first few selections. On cell selection, queens move from the origin
-
-When conflicting queens are added, the current queen turns red, and translates, along x, and then along y (is diagonal, or z possible?),
-moves over to the conflicting queen and kills it, and translates back to original position. After no more choices are left, the computer
-automatically places the remaining queens.
-This requires, that the final choice is actually solvable, so, you need to provide a hint as to
-what can be the next possible placement. Give multiple hints, so as to give choices to the user.
-Any cell not hinted also can be selected, but should not lead to conflicts later. Figure out if this is doable.
-
-The program will be sufficiently complex after the second is implemented.
-*/

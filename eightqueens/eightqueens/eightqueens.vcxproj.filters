@@ -18,6 +18,12 @@
     <ClCompile Include="gridDrawer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="queentranslator.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="eightqueentranslator.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="E:\output.txt" />
