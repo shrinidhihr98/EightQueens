@@ -78,9 +78,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="eightqueentranslator.c" />
-    <ClCompile Include="gridDrawer.c" />
-    <ClCompile Include="queentranslator.c" />
+    <ClCompile Include="solutions_finder.c" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="E:\output.txt" />

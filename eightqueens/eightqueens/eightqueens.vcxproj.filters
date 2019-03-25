@@ -15,13 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gridDrawer.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="queentranslator.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="eightqueentranslator.c">
+    <ClCompile Include="solutions_finder.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
