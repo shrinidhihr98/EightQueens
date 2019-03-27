@@ -28,21 +28,6 @@ int selected_cells_count = 0;
 
 int hint_cells_count = 0;
 
-typedef enum {solutionsToBeInitialized, hintsToBeInitialized, toBeReduced, toBeCompleted, noSolution } status;
-status state = solutionsToBeInitialized;
-
-void printState(char s[]){
-	printf("%s : The current state is ",s);
-	switch (state){
-	case solutionsToBeInitialized: printf("solutionsToBeInitialized"); break;
-	case hintsToBeInitialized: printf("hintsToBeInitialized"); break;
-	case toBeReduced: printf("toBeReduced"); break;
-	case toBeCompleted: printf("toBeCompleted"); break;
-	case noSolution: printf("noSolution"); break;
-	}
-	printf(".\n");
-}
-
 /******************************************************** DRAWING SECTION *************************************************************/
 //Converts cell indexes into Window Coordinates. WORKS
 int* indexToCoordinate(int i, int j){
@@ -116,23 +101,11 @@ void highlightCell(int i, int j){
 void showCurrentCells(){
 
 	for (int i = 0; i < selected_cells_count; i++){
-		printf("Currently selected cell: %d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1]);
 		highlightCell(selected_cells_array[i][0], selected_cells_array[i][1]);
 	}
 }
 
 /******************************************************** CIRCULAR LINKED LIST SECTION *************************************************************/
-/*
-Properties of the following linked list:
-It can contain only unique elements. delete() function returns a pointer to the head of the list.
-*/
-typedef struct solutions_node
-{
-	int solutionNumber;
-	struct solutions_node* next;
-} solutions_node;
-
-
 typedef struct hints_node
 {
 	int cell_i;
@@ -141,9 +114,6 @@ typedef struct hints_node
 } hints_node;
 int solutionNodesCount = 0;
 int hintsNodesCount = 0;
-//PERSISTENT LIST GETS OVERRIDDEN WITH EVERY NEW INPUT.
-struct hints_node* persistentHintsList = NULL;
-struct solutions_node* persistentsolutionsList = NULL;
 
 void hints_printList(struct hints_node** headRef){
 	struct hints_node* cursor = *headRef;
@@ -156,22 +126,7 @@ void hints_printList(struct hints_node** headRef){
 			printf("(%d,%d) ", cursor->cell_i,cursor->cell_j);
 			cursor = cursor->next;
 		} while (cursor != *headRef);
-		printf("\n=============\n");
-	}
-}
-
-void solutions_printList(struct solutions_node** headRef){
-	struct solutions_node* cursor = *headRef;
-	if (cursor == NULL){
-		printf("Solutions List is empty!\n");
-	}
-	else{
-		printf("Printing Solutions list:\n");
-		do{
-			printf("%d ", cursor->solutionNumber);
-			cursor = cursor->next;
-		} while (cursor != *headRef);
-		printf("\n=============\n");
+		printf("\n-----------------\n");
 	}
 }
 
@@ -182,18 +137,14 @@ struct hints_node* hints_append(struct hints_node** headRef, int i, int j){
 	new->cell_i = i;
 	new->cell_j = j;
 	new->next = *headRef;
-	//printf("*headRef is %p\n", *headRef);
 	struct hints_node* cursor = *headRef;
-	//printf("cursor->next is %p\n", cursor->next);
-	//printf("Cursor has %d,%d.\n", cursor->cell_i, cursor->cell_j);
-
+	
 	//Repeated code
 	if (cursor->cell_i == i && cursor->cell_j == j){
 		printf("Data already in list head. Cannot insert duplicates!\n");
 		return *headRef;
 	}
 	while (cursor->next != *headRef){
-		//printf("Cursor has %d,%d.\n", cursor->cell_i, cursor->cell_j);
 		if (cursor->cell_i == i && cursor->cell_j == j){
 			printf("Data already in list. Cannot insert duplicates!\n");
 			return *headRef;
@@ -206,141 +157,19 @@ struct hints_node* hints_append(struct hints_node** headRef, int i, int j){
 	return *headRef;
 }
 
-struct solutions_node* solutions_append(struct solutions_node** headRef, int data){
-	struct solutions_node* new = NULL;
-	new = malloc(sizeof(struct hints_node));
-	new->solutionNumber = data;
-	new->next = *headRef;
-
-	struct solutions_node* cursor = *headRef;
-	//Repeated code
-	if (cursor->solutionNumber == data){
-		printf("Data already in list. Cannot insert duplicates!\n");
-		return *headRef;
-	}
-	while (cursor->next != *headRef){		
-		if (cursor->solutionNumber == data){
-			printf("Data already in list. Cannot insert duplicates!\n");
-			return *headRef;
-		}
-		cursor = cursor->next;
-	}
-	cursor->next = new;
-	printf("Append %d succesful!\n",data);
-	solutionNodesCount++;
-	return *headRef;
-}
-
-struct hints_node* hints_delete(struct hints_node** headRef, int i, int j){
-	struct hints_node* cursor = *headRef;
-	struct hints_node* pre_cursor = *headRef;
-
-	if (*(&(*headRef)->cell_i) == i && *(&(*headRef)->cell_j) == j){
-		printf("Deleting head!\n");
-		printf("hintsNodesCount is %d\n", hintsNodesCount);
-		if (hintsNodesCount == 1){
-			hintsNodesCount--;
-			printf("No other elements in list. Returning null.\n");
-			return NULL;
-		}
-
-		while (pre_cursor->next != *headRef){
-			pre_cursor = pre_cursor->next;
-		}
-		
-		printf("Head is at: %p\n", *headRef);
-		printf("pre_cursor->next is %p and head->next is %p", pre_cursor->next, *(&(*headRef)->next));
-		pre_cursor->next = *(&(*headRef)->next);
-
-		free(*headRef);
-		*headRef = NULL;
-		printf("Deleted data: %d,%d\n", i,j);
-		hintsNodesCount--;
-		return pre_cursor->next;
-	}
-
-	cursor = cursor->next;
-	while (cursor != *headRef){
-		if (cursor->cell_i == i && cursor->cell_j == j){
-			while (pre_cursor->next != cursor){
-				pre_cursor = pre_cursor->next;
-			}
-			pre_cursor->next = cursor->next;
-			free(cursor);
-			printf("Deleted data: %d,%d\n", i, j);
-			hintsNodesCount--;
-			return *headRef;
-		}
-		cursor = cursor->next;
-	}
-	printf("Data %d,%d not found. Unable to delete!\n", i, j);
-	return *headRef;
-}
-
-struct solutions_node* solutions_delete(struct solutions_node** headRef, int data){
-	struct solutions_node* cursor = *headRef;
-	struct solutions_node* pre_cursor = *headRef;
-
-	if (*(&(*headRef)->solutionNumber) == data){
-		printf("Deleting head!\n");
-		printf("solutionNodesCount is %d\n", solutionNodesCount);
-		if (solutionNodesCount == 1){
-			solutionNodesCount--;
-			printf("No other elements in list. Returning null.\n");
-			return NULL;
-		}
-
-		while (pre_cursor->next != *headRef){
-			pre_cursor = pre_cursor->next;
-		}
-
-		printf("Head is at: %p\n", *headRef);
-		printf("pre_cursor->next is %p and head->next is %p", pre_cursor->next, *(&(*headRef)->next));
-		pre_cursor->next = *(&(*headRef)->next);
-
-		free(*headRef);
-		*headRef = NULL;
-		printf("Deleted data: %d\n", data);
-		solutionNodesCount--;
-		return pre_cursor->next;
-	}
-
-	cursor = cursor->next;
-	while (cursor != *headRef){
-		if (cursor->solutionNumber == data){
-			while (pre_cursor->next != cursor){
-				pre_cursor = pre_cursor->next;
-			}
-			pre_cursor->next = cursor->next;
-			free(cursor);
-			printf("Deleted data: %d\n", data);
-			solutionNodesCount--;
-			return *headRef;
-		}
-		cursor = cursor->next;
-	}
-	printf("Data %d not found. Unable to delete!\n", data);
-	return *headRef;
-}
-
 
 /******************************************************** MATCHING SOLUTIONS *************************************************************/
 
-
 void highlightHints(struct hints_node** headRef){
-	printf("HighlightHints called!\n");
-	struct hints_node* cursor = *(&(*headRef)->next);
-	
+	struct hints_node* cursor = *headRef;
 	glColor3f(0, 1, 1);
 	glPushMatrix();
 	glLoadIdentity();
 	
-	while (cursor != *headRef){
-		printf("Highlighting hint: %d,%d \n", cursor->cell_i, cursor->cell_j);
+	do{
 		highlightCell(cursor->cell_i, cursor->cell_j);
 		cursor = cursor->next;
-	}
-
+	}while (cursor != *headRef);
 	glPopMatrix();
 
 	
@@ -350,11 +179,9 @@ void highlightHints(struct hints_node** headRef){
 //Validates cell
 int valid(){
 	if (current_cell[0] >= 0 && current_cell[0] < 8 && current_cell[1] >= 0 && current_cell[1] < 8){
-		//printf("Current cell is valid.\n");
 		return 1;
 	}
 	else{
-		//printf("Current cell is not valid.\n");
 		return 0;
 	}
 }
@@ -362,11 +189,9 @@ int valid(){
 int CellinSelectedCells(int cell_i, int cell_j){
 	for (int i = 0; i < selected_cells_count; i++){
 		if (selected_cells_array[i][0] == cell_i && selected_cells_array[i][1] == cell_j){
-			//printf("Cell is in selected cells.\n");
 			return 1;
 		}
 	}
-	//printf("Cell is not in selected cells.\n");
 	return 0;
 }
 
@@ -379,6 +204,15 @@ int arrayContains(int arr[8][2], int cell_i, int cell_j){
 	return 0;
 }
 
+int isSolutionPossible(){
+
+	for (int k = 0; k < 92; k++){
+		if (solutionContainsSelected(k)){
+			return 1;
+		}
+	}
+	return 0;
+}
 int solutionContainsSelected(int k){
 	for (int i = 0; i < selected_cells_count; i++){
 		if (arrayContains(solutions[k], selected_cells_array[i][0], selected_cells_array[i][1]) == 0){
@@ -388,33 +222,16 @@ int solutionContainsSelected(int k){
 	return 1;
 }
 void findSolution(){
-	printState("On entering findSolution");
-	struct solutions_node* solutionsList = NULL;
-	solutionsList = malloc(sizeof(struct solutions_node));
-	if (solutionsList == NULL){
-		printf("Unable to allocate memory!\n");
-		state = noSolution;
-	}
-	//You have to handle this.
-	solutionsList->solutionNumber = 100;
-	solutionsList->next = solutionsList;
-	solutionNodesCount = 1;
-
-	
 	struct hints_node* hintsList = NULL;
 	hintsList = malloc(sizeof(struct hints_node));
 	if (hintsList == NULL){
 		printf("Unable to allocate memory!\n");
-		state = noSolution;
 	}
-	//You have to handle this.
+	//Initializing.
 	hintsList->cell_i = 10;
 	hintsList->cell_j = 10;
 	hintsList->next = hintsList;
 	hintsNodesCount = 1;
-
-	printf("Selected cells count is %d.\n", selected_cells_count);
-	printf("Current cell array: %d,%d\n", current_cell[0], current_cell[1]);
 
 	if (valid() && !CellinSelectedCells(current_cell[0],current_cell[1])){
 		printf("New cell found! %d,%d\n",current_cell[0],current_cell[1]);
@@ -429,38 +246,36 @@ void findSolution(){
 		}
 	}
 	
-	/****Finding solutions.****/
-	/*Code inside this comment section: Prints possible solution numbers.*/	
-	/*
-	printf("Printing currently selected cells:\n");
-	for (int i = 0; i < selected_cells_count; i++){
-		printf("%d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1]);
+	if (!isSolutionPossible()){
+		printf("NO SOLUTION EXISTS!!!!!!!!!!!!!!\n");
 	}
-	for (int k = 0; k < 92; k++){
-		if (solutionContainsSelected(k)){
-			printf("The solution number %d contains currently selected.\n", k);
-		}
-	}
-	*/
-
 	/*Finding hints.*/
-	for (int k = 0; k < 92; k++){
-		if (solutionContainsSelected(k)){
-			printf("The solution number %d contains currently selected.\n", k);
-			for (int i = 0; i < 8; i++){
-				if (!CellinSelectedCells(solutions[k][i][0], solutions[k][i][1])){
-					//printf("Possible cell:%d,%d\n", solutions[k][i][0], solutions[k][i][1]);
-					hintsList = hints_append(&hintsList, solutions[k][i][0], solutions[k][i][1]);
+	if (selected_cells_count > 0){
+		for (int k = 0; k < 92; k++){
+			if (solutionContainsSelected(k)){
+				printf("The solution number %d contains currently selected.\n", k);
+				for (int i = 0; i < 8; i++){
+					if (!CellinSelectedCells(solutions[k][i][0], solutions[k][i][1])){
+						if (hintsList->cell_i == 10){
+							//Replace the initialization parameters.
+							hintsList->cell_i = solutions[k][i][0];
+							hintsList->cell_j = solutions[k][i][1];
+						}
+						else{
+							hintsList = hints_append(&hintsList, solutions[k][i][0], solutions[k][i][1]);
+						}
+					}
 				}
 			}
 		}
+
+		hints_printList(&hintsList);
+		if (selected_cells_count < 8){
+			highlightHints(&hintsList);
+		}
 	}
-	hints_printList(&hintsList);
-	highlightHints(&hintsList);
+	showCurrentCells();
 }
-
-
-
 
 /******************************************************** DISPLAY SECTION *************************************************************/
 void display(void){
@@ -472,10 +287,7 @@ void display(void){
 	drawgrid();
 	current_cell[0] = coordinateToIndex(mouse_x, mouse_y)[0];
 	current_cell[1] = coordinateToIndex(mouse_x, mouse_y)[1];
-	printf("Currentcell in display function: %d,%d\n", current_cell[0], current_cell[1]);
-	//Only  eight queens can be placed on the grid.
 	findSolution();
-	showCurrentCells();
 
 	glFlush();
 
