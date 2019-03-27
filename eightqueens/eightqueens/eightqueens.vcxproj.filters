@@ -20,4 +20,9 @@
   <ItemGroup>
     <None Include="E:\solutions array generator.py" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="hintsFinder.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
 </Project>
