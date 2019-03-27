@@ -98,59 +98,11 @@ void highlightCell(int i, int j){
 }
 
 //Draws already placed cells. Works.
-void showCurrentCells(){
+void showSelectedCells(){
 
 	for (int i = 0; i < selected_cells_count; i++){
 		highlightCell(selected_cells_array[i][0], selected_cells_array[i][1]);
 	}
-}
-void translatequeen(int i, int j){
-	
-	int grid_right = grid_left + (8 * grid_increment);
-	int grid_top = grid_bottom + (8 * grid_increment);
-
-
-	int target_position_x = indexToCoordinate(i, j)[0];
-	int target_position_y = indexToCoordinate(i, j)[1];
-
-
-	//The following code moves the queen on click.
-	if (queen_position_x < target_position_x){
-		queen_position_x += 1;
-		move_right = 1;
-
-	}
-	else{
-		printf("Move right set to zero!\n");
-		move_right = 0;
-	}
-	if (queen_position_y < target_position_y && move_right == 0){
-		queen_position_y += 1;
-		move_up = 1;
-	}
-	else {
-		move_up = 0;
-	}
-
-	if ((move_right == 1) | (move_up == 1)){
-		glutPostRedisplay();
-	}
-
-	drawcell(queen_position_x, queen_position_y);
-
-	printf("\tStarting queenposition: x,y: %d,%d\n\tEnding queen position: x,y, %d,%d\n", queen_position_x, queen_position_y, target_position_x, target_position_y);
-	glPushMatrix();
-	glLoadIdentity();
-	drawgrid();
-	glTranslatef(move_right, move_up, 0);
-
-	glPopMatrix();
-
-	if ((move_right == 0) && (move_up == 0)){
-		queen_position_x = 0;
-		queen_position_y = 0;
-	}
-	
 }
 
 
@@ -195,13 +147,13 @@ struct hints_node* hints_append(struct hints_node** headRef, int i, int j){
 	}
 	while (cursor->next != *headRef){
 		if (cursor->cell_i == i && cursor->cell_j == j){
-			printf("Data already in list. Cannot insert duplicates!\n");
+			//printf("Data already in list. Cannot insert duplicates!\n");
 			return *headRef;
 		}
 		cursor = cursor->next;
 	}
 	cursor->next = new;
-	printf("Hints Append succesful!\n");
+	//printf("Hints Append succesful!\n");
 	hintsNodesCount++;
 	return *headRef;
 }
@@ -290,18 +242,12 @@ void findSolution(){
 			selected_cells_array[selected_cells_count][0] = current_cell[0];
 			selected_cells_array[selected_cells_count][1] = current_cell[1];
 			selected_cells_count++;
-			translatequeen(current_cell[0], current_cell[1]);
 		}
 		else{
 			printf("no new cell.\n");
 		}
 	}
 
-	printf("Current cell is: %d,%d\n", current_cell[0], current_cell[1]);
-	printf("Currently Selected cells are:\n");
-	for (int i = 0; i < selected_cells_count; i++){
-	printf("%d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1]);
-	}
 	if (!isSolutionPossible()){
 		printf("NO SOLUTION EXISTS!!!!!!!!!!!!!!\n");
 	}
@@ -325,12 +271,12 @@ void findSolution(){
 			}
 		}
 
-		hints_printList(&hintsList);
+		//hints_printList(&hintsList);
 		if (selected_cells_count < 8){
 			highlightHints(&hintsList);
 		}
 	}
-	showCurrentCells();
+	showSelectedCells();
 }
 
 /******************************************************** DISPLAY SECTION *************************************************************/
@@ -344,7 +290,6 @@ void display(void){
 	current_cell[0] = coordinateToIndex(mouse_x, mouse_y)[0];
 	current_cell[1] = coordinateToIndex(mouse_x, mouse_y)[1];
 	
-	translatequeen(current_cell[0],current_cell[1]);
 	findSolution();
 	glFlush();
 
