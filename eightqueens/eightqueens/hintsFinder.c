@@ -104,6 +104,55 @@ void showCurrentCells(){
 		highlightCell(selected_cells_array[i][0], selected_cells_array[i][1]);
 	}
 }
+void translatequeen(int i, int j){
+	
+	int grid_right = grid_left + (8 * grid_increment);
+	int grid_top = grid_bottom + (8 * grid_increment);
+
+
+	int target_position_x = indexToCoordinate(i, j)[0];
+	int target_position_y = indexToCoordinate(i, j)[1];
+
+
+	//The following code moves the queen on click.
+	if (queen_position_x < target_position_x){
+		queen_position_x += 1;
+		move_right = 1;
+
+	}
+	else{
+		printf("Move right set to zero!\n");
+		move_right = 0;
+	}
+	if (queen_position_y < target_position_y && move_right == 0){
+		queen_position_y += 1;
+		move_up = 1;
+	}
+	else {
+		move_up = 0;
+	}
+
+	if ((move_right == 1) | (move_up == 1)){
+		glutPostRedisplay();
+	}
+
+	drawcell(queen_position_x, queen_position_y);
+
+	printf("\tStarting queenposition: x,y: %d,%d\n\tEnding queen position: x,y, %d,%d\n", queen_position_x, queen_position_y, target_position_x, target_position_y);
+	glPushMatrix();
+	glLoadIdentity();
+	drawgrid();
+	glTranslatef(move_right, move_up, 0);
+
+	glPopMatrix();
+
+	if ((move_right == 0) && (move_up == 0)){
+		queen_position_x = 0;
+		queen_position_y = 0;
+	}
+	
+}
+
 
 /******************************************************** CIRCULAR LINKED LIST SECTION *************************************************************/
 typedef struct hints_node
@@ -232,6 +281,7 @@ void findSolution(){
 	hintsList->cell_j = 10;
 	hintsList->next = hintsList;
 	hintsNodesCount = 1;
+	
 
 	if (valid() && !CellinSelectedCells(current_cell[0],current_cell[1])){
 		printf("New cell found! %d,%d\n",current_cell[0],current_cell[1]);
@@ -240,12 +290,18 @@ void findSolution(){
 			selected_cells_array[selected_cells_count][0] = current_cell[0];
 			selected_cells_array[selected_cells_count][1] = current_cell[1];
 			selected_cells_count++;
+			translatequeen(current_cell[0], current_cell[1]);
 		}
 		else{
 			printf("no new cell.\n");
 		}
 	}
-	
+
+	printf("Current cell is: %d,%d\n", current_cell[0], current_cell[1]);
+	printf("Currently Selected cells are:\n");
+	for (int i = 0; i < selected_cells_count; i++){
+	printf("%d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1]);
+	}
 	if (!isSolutionPossible()){
 		printf("NO SOLUTION EXISTS!!!!!!!!!!!!!!\n");
 	}
@@ -287,8 +343,9 @@ void display(void){
 	drawgrid();
 	current_cell[0] = coordinateToIndex(mouse_x, mouse_y)[0];
 	current_cell[1] = coordinateToIndex(mouse_x, mouse_y)[1];
+	
+	translatequeen(current_cell[0],current_cell[1]);
 	findSolution();
-
 	glFlush();
 
 	printf("=========================================================\n");
@@ -308,6 +365,7 @@ void mouse(int button, int state, int x, int y){
 		if (mouse_y < 0){
 			mouse_y = mouse_y*-1;
 		}
+		
 	}
 	
 	glutPostRedisplay();
