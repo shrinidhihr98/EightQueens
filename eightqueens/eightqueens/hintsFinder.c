@@ -236,7 +236,7 @@ void findSolution(){
 	
 
 	if (valid() && !CellinSelectedCells(current_cell[0],current_cell[1])){
-		printf("New cell found! %d,%d\n",current_cell[0],current_cell[1]);
+		printf("\nNew cell found! %d,%d\n",current_cell[0],current_cell[1]);
 		if (selected_cells_count < 8){
 			//TODO: Find a better place to put these following 3 lines.
 			selected_cells_array[selected_cells_count][0] = current_cell[0];
@@ -278,6 +278,57 @@ void findSolution(){
 	}
 	showSelectedCells();
 }
+/*************************TRANSLATE QUEENS********************************/
+void translatequeen(int i, int j){
+
+	int grid_right = grid_left + (8 * grid_increment);
+	int grid_top = grid_bottom + (8 * grid_increment);
+
+
+	int target_position_x = indexToCoordinate(i, j)[0];
+	int target_position_y = indexToCoordinate(i, j)[1];
+
+
+	//The following code moves the queen on click.
+	if (queen_position_x < target_position_x){
+		queen_position_x += 1;
+		move_right = 1;
+
+	}
+	else{
+		move_right = 0;
+	}
+	if (queen_position_y < target_position_y && move_right == 0){
+		queen_position_y += 1;
+		move_up = 1;
+	}
+	else {
+		move_up = 0;
+	}
+
+	if ((move_right == 1) | (move_up == 1)){
+		glutPostRedisplay();
+	}
+
+	drawcell(queen_position_x, queen_position_y);
+
+	glPushMatrix();
+	glLoadIdentity();
+	drawgrid();
+	showSelectedCells();
+	glTranslatef(move_right, move_up, 0);
+
+	glPopMatrix();
+
+	if ((move_right == 0) && (move_up == 0)){
+		findSolution();
+		queen_position_x = 0;
+		queen_position_y = 0;
+	}
+
+}
+
+
 
 /******************************************************** DISPLAY SECTION *************************************************************/
 void display(void){
@@ -289,11 +340,13 @@ void display(void){
 	drawgrid();
 	current_cell[0] = coordinateToIndex(mouse_x, mouse_y)[0];
 	current_cell[1] = coordinateToIndex(mouse_x, mouse_y)[1];
-	
-	findSolution();
+	printf("................................................................................");
+	if ((selected_cells_count < 8) && !CellinSelectedCells(current_cell[0], current_cell[1]))
+		{
+			translatequeen(current_cell[0], current_cell[1]);
+		}
 	glFlush();
-
-	printf("=========================================================\n");
+	
 }
 
 
