@@ -142,6 +142,7 @@ void drawcell(int x, int y, GLfloat* color){
 	glColor3fv(GREEN);
 
 }
+
 //Highlights cell i,j on the grid. Maybe the checks here are redundant/ the checks must be handled even before calling this function.
 void highlightCellIndex(int cell_i, int cell_j, GLfloat* color){
 	int grid_right = grid_left + (8 * grid_increment);
