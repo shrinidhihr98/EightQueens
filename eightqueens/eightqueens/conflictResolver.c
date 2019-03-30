@@ -348,13 +348,14 @@ int* detectConflict(int conflict[], int cell_i, int cell_j){
 /******************************************************** SELECTED CELLS ARRAY SECTION *************************************************************/
 //Draws already placed cells.
 void showSelectedCells(){
-	/*
+	/*The following print can be removed.*/
+	
 	printf("In showselectedcells(), the selectedCellsArray is:\n");
 	for (int i = 0; i < selected_cells_count; i++){
 	printf("Show: %d\t i,j : %d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1], selected_cells_array[i][2]);
 	}
 	printf("End of list.\n");
-	*/
+	
 	for (int i = 0; i < selected_cells_count; i++){
 		if (selected_cells_array[i][0] == 1){
 			//printf("Highlighting in green: %d,%d.\n", selected_cells_array[i][1], selected_cells_array[i][2]);
@@ -372,12 +373,14 @@ void addNewCelltoSelectedCells(int cell_i, int cell_j){
 	selected_cells_count++;
 
 	/*The following print can be removed.*/
+	
 	printf("In addnewcelltoselectedcells(), the selectedcells array is now:\n");
 	for (int i = 0; i < selected_cells_count; i++){
 		printf("Show: %d\t i,j : %d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1], selected_cells_array[i][2]);
 	}
 
 	printf("End of list.\n");
+	
 }
 //Can be used to set show or not using value = 1 or 0 respectively.
 void setSelected(int cell_i, int cell_j, int value){
@@ -419,11 +422,14 @@ void displaySolution(){
 				target_position_y = indexToCoordinate(newi, newj)[1];
 				printf("\nNew cell found: %d,%d\n", newi, newj);
 				state = MoveNewRight;
-				printf("State set to moveNewRight.\n");
+				//printf("State set to moveNewRight.\n");
 				glutPostRedisplay();
 			}
 			else{
 				printf("No new cell.\n");
+				if (selected_cells_count > 0){
+					state = FindHints;
+				}
 			}
 		}
 		else{
@@ -439,7 +445,7 @@ void displaySolution(){
 		}
 		if (queen_position_x == target_position_x){
 			state = MoveNewUp;
-			printf("State set to moveNewUp.\n");
+			//printf("State set to moveNewUp.\n");
 		}
 		drawcell(queen_position_x, queen_position_y, GREEN);
 		glutPostRedisplay();
@@ -451,7 +457,7 @@ void displaySolution(){
 		}
 		if (queen_position_y == target_position_y){
 			state = CheckConflict;
-			printf("State set to CheckConflict.\n");
+			//printf("State set to CheckConflict.\n");
 		}
 		drawcell(queen_position_x, queen_position_y, GREEN);
 		glutPostRedisplay();
@@ -461,20 +467,20 @@ void displaySolution(){
 		conflictArray[0] = c[0];
 		conflictArray[1] = c[1];
 		conflictArray[2] = c[2];
-		printf("In state CheckConflict, ");
+		//printf("In state CheckConflict, ");
 		if (conflictArray[0] == 0){
 			printf("No conflict found.\n");
 			addNewCelltoSelectedCells(newi, newj);
 			state = FindHints;
-			printf("State set to FindHints!\n");
+			//printf("State set to FindHints!\n");
 
 		}
 		else{
 			printf("CONFLICT EXISTS!\n");
 			state = MoveConflictHorizontal;
 			setSelected(conflictArray[1], conflictArray[2], 0);
-			printf("Setselected conflict array to 0: %d,%d\n", conflictArray[0], conflictArray[1]);
-			printf("State set to MoveConflictHorizontal.\n");
+			//printf("Setselected conflict array to 0: %d,%d\n", conflictArray[0], conflictArray[1]);
+			//printf("State set to MoveConflictHorizontal.\n");
 			queen_position_x = indexToCoordinate(conflictArray[1], conflictArray[2])[0];
 			queen_position_y = indexToCoordinate(conflictArray[1], conflictArray[2])[1];
 		}
@@ -491,7 +497,7 @@ void displaySolution(){
 		}
 		if (queen_position_x == target_position_x){
 			state = MoveConflictVertical;
-			printf("State set to MoveConflictVertical.\n");
+			//printf("State set to MoveConflictVertical.\n");
 		}
 		drawcell(target_position_x, target_position_y, ORANGE);
 		drawcell(queen_position_x, queen_position_y, RED);
@@ -519,7 +525,7 @@ void displaySolution(){
 			state = MoveConflictVerticalBack;
 			drawcell(queen_position_x, queen_position_y, GREEN);
 
-			printf("State set to MoveConflictVerticalBack.\n");
+			//printf("State set to MoveConflictVerticalBack.\n");
 		}
 		glutPostRedisplay();
 		break;
@@ -532,7 +538,7 @@ void displaySolution(){
 		}
 		if (queen_position_y == target_position_y){
 			state = MoveConflictHorizontalBack;
-			printf("State set to MoveConflictHorizontalBack.\n");
+			//printf("State set to MoveConflictHorizontalBack.\n");
 		}
 		drawcell(queen_position_x, queen_position_y, GREEN);
 		glutPostRedisplay();
@@ -548,7 +554,8 @@ void displaySolution(){
 		if (queen_position_x == target_position_x){
 			setSelected(conflictArray[1], conflictArray[2], 1);
 			printf("Setselected conflict array to 1: %d,%d\n", conflictArray[1], conflictArray[2]);
-			printf("Set state to FindHints!\n");
+			//printf("Set state to FindHints!\n");
+			printf("Conflict resolved!\n");
 			state = FindHints;
 		}
 		drawcell(queen_position_x, queen_position_y, GREEN);
@@ -607,6 +614,59 @@ void mouse(int button, int state, int x, int y){
 	glutPostRedisplay();
 }
 
+void menu(int choice){
+	switch (choice){
+	case 1:
+		/*Reset the game.*/
+		printf("RESETTING!\n");
+		mouse_x = 0;
+		mouse_y = 0;
+		for (int i = 0; i < selected_cells_count; i++){
+			selected_cells_array[i][0] = 0;
+			selected_cells_array[i][1] = 0;
+			selected_cells_array[i][2] = 0;
+		}
+		selected_cells_count = 0;
+		current_cell[0] = 0;
+		current_cell[1] = 0;
+
+		newi = 0;
+		newj = 0;
+
+		queen_position_x = 0;
+		queen_position_y = 0;
+
+		target_position_x = 0; 
+		target_position_y = 0;
+
+		conflictArray[0] = 0;
+		conflictArray[1] = 0;
+		conflictArray[2] = 0;
+
+		move_right = 1;
+		move_up = 0;
+
+		hint_cells_count = 0;
+
+		state = Wait;
+		glutPostRedisplay();
+		break;
+	case 2: /*Undo selection.*/
+		if (selected_cells_count > 0 && selected_cells_count<8 ){
+			printf("Undoing selection! Cell %d,%d removed.\n",selected_cells_array[selected_cells_count - 1][1] ,selected_cells_array[selected_cells_count - 1][2]);
+			selected_cells_array[selected_cells_count - 1][0] = 0;
+			selected_cells_array[selected_cells_count - 1][1] = 0;
+			selected_cells_array[selected_cells_count - 1][2] = 0;
+			selected_cells_count--;
+			state = FindHints;
+		}
+		glutPostRedisplay();
+		break;
+	default:
+		break;
+	}
+}
+
 void main(int argc, char **argv){
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
@@ -615,6 +675,10 @@ void main(int argc, char **argv){
 	glMatrixMode(GL_PROJECTION);
 	gluOrtho2D(0, window_height, 0, window_height);
 	glMatrixMode(GL_MODELVIEW);
+	glutCreateMenu(menu);
+	glutAddMenuEntry("Reset", 1);
+	glutAddMenuEntry("Undo", 2);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
 	glutDisplayFunc(display);
 
 	glutMouseFunc(mouse);
