@@ -617,3 +617,27 @@ void main(int argc, char **argv){
 	glutMouseFunc(mouse);
 	glutMainLoop();
 }
+/*
+Todo: Rename list related variables later.
+
+#Program does not handle window resizing.
+
+#First stage:
+Order:
+Place first queen immediately as user clicks on a valid cell. Overlap remaining 7 queens at window origin. Move the queens one by one,
+(remember to skip the currently placed ones), and final queen should not leave any trace. Queens first move along x, then along y.
+
+STAGE 1 COMPLETED!!!!!!!!!
+
+#Second stage:
+User places a queen in the first selection. On cell selection, queens move from the origin to the cell. DONE.
+
+All cells which can be a possible solution are highlighted. DONE.
+
+When conflicting queens are added, the current queen turns red, and translates, along x, and then along y,
+moves over to the conflicting queen and kills it, and translates back to original position. Done.
+After no more choices are left, the computer
+automatically places the remaining queens.
+
+The program will be sufficiently complex after the second is implemented.
+*/
