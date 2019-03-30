@@ -1,7 +1,6 @@
 #include<stdlib.h> //Has to be placed above glut.h line; otherwise raises error C2381:'exit':redefinition.
 #include<GL/glut.h>
 #include<stdio.h>
-#include<windows.h>
 
 int window_height = 600;
 
@@ -15,7 +14,13 @@ int grid_increment = 50;
 int queen_position_x = 0;
 int queen_position_y = 0;
 
+int target_position_x = 0, target_position_y = 0;
+
 int current_cell[2] = { 0, 0 };
+int newi = 0;
+int newj = 0;
+
+int conflictArray[3] = { 0, 0, 0 };
 
 int move_right = 1;
 int move_up = 0;
@@ -24,10 +29,20 @@ int solutions[92][8][2] = { { { 0, 1 }, { 1, 3 }, { 2, 5 }, { 3, 7 }, { 4, 2 }, 
 
 int wait[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-int selected_cells_array[8][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
+int selected_cells_array[8][3] = { { 0, 0, 1 }, { 0, 0, 1 }, { 0, 0, 1 }, { 0, 0, 1 }, { 0, 0, 1 }, { 0, 0, 1 }, { 0, 0, 1 }, { 0, 0, 1 } };
 int selected_cells_count = 0;
 
 int hint_cells_count = 0;
+
+typedef enum { ToBeStarted, Started, MoveNewRight, MoveNewUp, CheckConflict, MoveConflictHorizontal, MoveConflictVertical, Killed, MoveConflictHorizontalBack, MoveConflictVerticalBack, FindHints, Done } status;
+enum status state = ToBeStarted;
+
+/*Colors*/
+GLfloat RED[3] = { 1, 0, 0 };
+GLfloat GREEN[3] = { 0, 1, 0 };
+GLfloat BLUE[3] = { 0, 0, 1 };
+GLfloat LIGHT_BLUE[3] = { 0, 1, 1 };
+GLfloat ORANGE[3] = { 1, 0.5, 0 };
 
 /******************************************************** DRAWING SECTION *************************************************************/
 //Converts cell indexes into Window Coordinates. WORKS
@@ -68,19 +83,21 @@ void drawgrid(){
 }
 
 //Takes in coordinate point, draws cells placing point at left bottom. WORKS
-void drawcell(int x, int y){
+void drawcell(int x, int y, GLfloat* color){
 	//printf("Drawcell: Drawing cell at x,y: %d,%d\n", x, y);
+	glColor3fv(color);
 	glBegin(GL_QUADS);
 	glVertex2i(x, y);
 	glVertex2i(x + grid_increment, y);
 	glVertex2i(x + grid_increment, y + grid_increment);
 	glVertex2i(x, y + grid_increment);
 	glEnd();
+	glColor3fv(GREEN);
 
 }
 
 //Highlights cell i,j on the grid. WORKS.
-void highlightCell(int i, int j){
+void highlightCell(int i, int j,GLfloat* color){
 	int grid_right = grid_left + (8 * grid_increment);
 	int grid_top = grid_bottom + (8 * grid_increment);
 
@@ -90,7 +107,7 @@ void highlightCell(int i, int j){
 	int y = indexToCoordinate(i, j)[1];
 
 	if (x >= grid_left && x < grid_right && y >= grid_bottom && y < grid_top){
-		drawcell(x, y);
+		drawcell(x, y,color);
 	}
 	else{
 		printf("Grid left, bottom, top, right: %d, %d, %d, %d\n", grid_left, grid_bottom, grid_top, grid_right);
@@ -102,7 +119,13 @@ void highlightCell(int i, int j){
 void showSelectedCells(){
 
 	for (int i = 0; i < selected_cells_count; i++){
-		highlightCell(selected_cells_array[i][0], selected_cells_array[i][1]);
+		//printf("Selected cell: %d,%d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1], selected_cells_array[i][2]);
+		//printf("Highlighting selected cells:\n");
+		if (selected_cells_array[i][2] == 1){
+			
+			highlightCell(selected_cells_array[i][0], selected_cells_array[i][1],GREEN);
+		}
+
 	}
 }
 
@@ -125,7 +148,7 @@ void hints_printList(struct hints_node** headRef){
 	else{
 		printf("Printing hints list:\n");
 		do{
-			printf("(%d,%d) ", cursor->cell_i,cursor->cell_j);
+			printf("(%d,%d) ", cursor->cell_i, cursor->cell_j);
 			cursor = cursor->next;
 		} while (cursor != *headRef);
 		printf("\n-----------------\n");
@@ -140,10 +163,10 @@ struct hints_node* hints_append(struct hints_node** headRef, int i, int j){
 	new->cell_j = j;
 	new->next = *headRef;
 	struct hints_node* cursor = *headRef;
-	
+
 	//Repeated code
 	if (cursor->cell_i == i && cursor->cell_j == j){
-	//	printf("Data already in list head. Cannot insert duplicates!\n");
+		//printf("Data already in list head. Cannot insert duplicates!\n");
 		return *headRef;
 	}
 	while (cursor->next != *headRef){
@@ -164,24 +187,22 @@ struct hints_node* hints_append(struct hints_node** headRef, int i, int j){
 
 void highlightHints(struct hints_node** headRef){
 	struct hints_node* cursor = *headRef;
-	glColor3f(0, 1, 1);
+	
 	glPushMatrix();
 	glLoadIdentity();
-	
+	printf("Highlighting hints:\n");
 	do{
-		if (cursor->cell_i != 10){
-		highlightCell(cursor->cell_i, cursor->cell_j);
-		}
+		highlightCell(cursor->cell_i, cursor->cell_j,LIGHT_BLUE);
 		cursor = cursor->next;
-	}while (cursor != *headRef);
+	} while (cursor != *headRef);
 	glPopMatrix();
 
+
 	
-	glColor3f(0, 1, 0);
 }
 
 //Validates cell
-int valid(){
+int validCell(){
 	if (current_cell[0] >= 0 && current_cell[0] < 8 && current_cell[1] >= 0 && current_cell[1] < 8){
 		return 1;
 	}
@@ -208,6 +229,16 @@ int arrayContains(int arr[8][2], int cell_i, int cell_j){
 	return 0;
 }
 
+
+int solutionContainsSelected(int k){
+	for (int i = 0; i < selected_cells_count; i++){
+		if (arrayContains(solutions[k], selected_cells_array[i][0], selected_cells_array[i][1]) == 0){
+			return 0;
+		}
+	}
+	return 1;
+}
+
 int isSolutionPossible(){
 
 	for (int k = 0; k < 92; k++){
@@ -217,15 +248,7 @@ int isSolutionPossible(){
 	}
 	return 0;
 }
-int solutionContainsSelected(int k){
-	for (int i = 0; i < selected_cells_count; i++){
-		if (arrayContains(solutions[k], selected_cells_array[i][0], selected_cells_array[i][1]) == 0){
-			return 0;
-		}
-	}
-	return 1;
-}
-void findSolution(){
+void findHints(){
 	struct hints_node* hintsList = NULL;
 	hintsList = malloc(sizeof(struct hints_node));
 	if (hintsList == NULL){
@@ -236,14 +259,15 @@ void findSolution(){
 	hintsList->cell_j = 10;
 	hintsList->next = hintsList;
 	hintsNodesCount = 1;
-	
 
-	if (valid() && !CellinSelectedCells(current_cell[0],current_cell[1])){
-		printf("\nNew cell found! %d,%d\n",current_cell[0],current_cell[1]);
+
+	if (validCell() && !CellinSelectedCells(current_cell[0], current_cell[1])){
+		printf("\nNew cell found! %d,%d\n", current_cell[0], current_cell[1]);
 		if (selected_cells_count < 8){
 			//TODO: Find a better place to put these following 3 lines.
 			selected_cells_array[selected_cells_count][0] = current_cell[0];
 			selected_cells_array[selected_cells_count][1] = current_cell[1];
+			selected_cells_array[selected_cells_count][2] = 1;
 			selected_cells_count++;
 		}
 		else{
@@ -281,13 +305,99 @@ void findSolution(){
 	}
 }
 /*************************TRANSLATE QUEENS********************************/
-void translatequeen(int i, int j){
-	//Sleep for 50 ms.
-	//Sleep(1);
-	/* The for loop solution for time delay works better, and current offers better control than Sleep().*/
-	for (int it = 0; it < 1000; it++){
-		for (int jt = 0; jt < 1000; jt++);
+
+int* detectConflict(int conflict[], int newi, int newj){
+
+	int A = 0, B = 0;
+	for (int s = 0; s < selected_cells_count; s++){
+		A = selected_cells_array[s][0];
+		B = selected_cells_array[s][1];
+		printf("A is%d. B is %d.\n", A, B);
+		printf("newi is %d. newj is %d.\n", newi, newj);
+		/*Handle row or column conflicts.*/
+		if (A == newi || B == newj){
+			conflict[0] = 1;
+			conflict[1] = A;
+			conflict[2] = B;
+			return conflict;
+		}
+
+		/*Handle diagonal conflict along north east.*/
+		for (int i = 1; i < (8 - ((A>B) ? A : B)); i++){
+			if ((newi == (A + i)) && (newj == (B + i))){
+				conflict[0] = 1;
+				conflict[1] = A;
+				conflict[2] = B;
+				return conflict;
+			}
+		}
+
+		/*Handle diagonal conflict along south west.*/
+		for (int i = 1; i <= ((A<B) ? A : B); i++){
+			if ((newi == (A - i)) && (newj == (B - i))){
+				conflict[0] = 1;
+				conflict[1] = A;
+				conflict[2] = B;
+				return conflict;
+			}
+		}
+
+		/*Handle conflicts along other diagonals.*/
+
+
+		if (A > B){
+			for (int i = 1; i < 8 - A; i++){
+				if ((newi == (A + i)) && (newj == (B - i))){
+					conflict[0] = 1;
+					conflict[1] = A;
+					conflict[2] = B;
+					return conflict;
+				}
+			}
+
+			for (int i = 1; i <= A; i++){
+				if ((newi == (A - i)) && (newj == (B + i))){
+					conflict[0] = 1;
+					conflict[1] = A;
+					conflict[2] = B;
+					return conflict;
+				}
+			}
+		}
+		if (A < B){
+			for (int i = 1; i <= B; i++){
+				if ((newi == (A + i)) && (newj == (B - i))){
+					conflict[0] = 1;
+					conflict[1] = A;
+					conflict[2] = B;
+					return conflict;
+				}
+			}
+			for (int i = 1; i < 8 - B; i++){
+				if ((newi == (A - i)) && (newj == (B + i))){
+					conflict[0] = 1;
+					conflict[1] = A;
+					conflict[2] = B;
+					return conflict;
+				}
+			}
+		}
+
+
 	}
+	conflict[0] = 0;
+	conflict[1] = 0;
+	conflict[2] = 0;
+	return conflict;
+}
+
+void translatequeen(int i, int j){
+	for (int it = 0; it < 1000; it++){
+		for (int jt = 0; jt < 100; jt++);
+	}
+	int array[3] = { 0, 0, 0 };
+	int* c = detectConflict(array, i, j);
+	printf("Conflict array: %d,%d,%d\n", c[0], c[1], c[2]);
 	int grid_right = grid_left + (8 * grid_increment);
 	int grid_top = grid_bottom + (8 * grid_increment);
 
@@ -317,25 +427,221 @@ void translatequeen(int i, int j){
 		glutPostRedisplay();
 	}
 
-	drawcell(queen_position_x, queen_position_y);
+	drawcell(queen_position_x, queen_position_y,GREEN);
 
 	glPushMatrix();
 	glLoadIdentity();
 	drawgrid();
-	
+	showSelectedCells();
 	glTranslatef(move_right, move_up, 0);
 
 	glPopMatrix();
 
 	if ((move_right == 0) && (move_up == 0)){
-		findSolution();
+		findHints();
 		queen_position_x = 0;
 		queen_position_y = 0;
 	}
 
 }
 
+void setSelected(int newi, int newj, int value){
+	for (int i = 0; i < selected_cells_count; i++){
+		if (selected_cells_array[i][0] == newi && selected_cells_array[i][1] == newj){
+			selected_cells_array[i][2] = value;
+		}
+	}
+}
 
+void drawBackground(void){
+	glPushMatrix();
+	glLoadIdentity();
+	drawgrid();
+	showSelectedCells();
+	glTranslatef(move_right, move_up, 0);
+	glPopMatrix();
+
+}
+
+void displaySolution(){
+	//{ ToBeStarted, Started, MoveNewRight, MoveNewUp, CheckConflict,
+	//	MoveConflictHorizontal, MoveConflictVertical, Killed, MoveConflictHorizontalBack,
+	//	MoveConflictVerticalBack, FindHints, Done }
+	for (int it = 0; it < 1000; it++){
+		for (int jt = 0; jt < 1000; jt++);
+	}
+
+	int array[3] = { 0, 0, 0 };
+	int* c = NULL;
+	switch (state){
+	case ToBeStarted:
+		if (validCell())
+		{
+			state = Started;
+			glutPostRedisplay();
+		}
+		drawBackground();
+		break;
+	case Started:
+		if (!CellinSelectedCells(current_cell[0], current_cell[1]))
+		{
+			newi = current_cell[0];
+			newj = current_cell[1];
+			queen_position_x = 0;//Is this redundant?
+			queen_position_y = 0;
+			target_position_x = indexToCoordinate(newi, newj)[0];
+			target_position_y = indexToCoordinate(newi, newj)[1];
+			printf("\nNew cell found! %d,%d\n", newi, newj);
+			state = MoveNewRight;
+		}
+		else{
+			printf("No new cell.\n");
+		}
+		drawcell(queen_position_x, queen_position_y,GREEN);
+		drawBackground();
+		break;
+	case MoveNewRight:
+		if (queen_position_x < target_position_x){
+			queen_position_x++;
+			glutPostRedisplay();
+		}
+		if (queen_position_x == target_position_x){
+			state = MoveNewUp;
+			glutPostRedisplay();
+		}
+		drawcell(queen_position_x, queen_position_y,GREEN);
+		drawBackground();
+		break;
+	case MoveNewUp:
+		if (queen_position_y < target_position_y){
+			queen_position_y++;
+			glutPostRedisplay();
+		}
+		if (queen_position_y == target_position_y){
+			state = CheckConflict;
+			glutPostRedisplay();
+		}
+		drawcell(queen_position_x, queen_position_y,GREEN);
+		drawBackground();
+		break;
+	case CheckConflict:
+
+		c = detectConflict(array, newi, newj);
+		conflictArray[0] = c[0];
+		conflictArray[1] = c[1];
+		conflictArray[2] = c[2];
+
+		if (conflictArray[0] == 0){
+			printf("No conflict found.\n");
+			state = FindHints;
+			glutPostRedisplay();
+		}
+		else{
+			printf("CONFLICT EXISTS!\n");
+			state = MoveConflictHorizontal;
+			queen_position_x = indexToCoordinate(conflictArray[1], conflictArray[2])[0];			
+			queen_position_y = indexToCoordinate(conflictArray[1], conflictArray[2])[1];
+			glutPostRedisplay();
+		}
+		drawcell(queen_position_x, queen_position_y,RED);
+		drawBackground();
+		break;
+	case MoveConflictHorizontal:
+		printf("Moving conflict horizontal.\n");
+
+		setSelected(newi, newj, 0);
+		if (queen_position_x < target_position_x){
+			queen_position_x++;
+		}
+		if (queen_position_x > target_position_x){
+			queen_position_x--;
+		}
+		if (queen_position_x == target_position_x){
+			state = MoveConflictVertical;
+		}
+
+		glutPostRedisplay();
+		drawcell(target_position_x, target_position_y,ORANGE);
+		drawcell(queen_position_x, queen_position_y,RED);
+		drawBackground();
+		break;
+	case MoveConflictVertical:
+		if (queen_position_y < target_position_y){
+			queen_position_y++;
+		}
+		if (queen_position_y > target_position_y){
+			queen_position_y--;
+		}
+		if (queen_position_y == target_position_y){
+			state = Killed;
+		}
+		glutPostRedisplay();
+		drawcell(target_position_x, target_position_y,ORANGE);
+		drawcell(queen_position_x, queen_position_y,RED);
+		drawBackground();
+		break;
+	case Killed:
+		target_position_x = indexToCoordinate(conflictArray[1], conflictArray[2])[0];
+		target_position_y = indexToCoordinate(conflictArray[1], conflictArray[2])[1];
+		queen_position_x = indexToCoordinate(newi, newj)[0];
+		queen_position_y = indexToCoordinate(newi, newj)[1];
+		state = MoveConflictVerticalBack;
+		glutPostRedisplay();
+		drawcell(queen_position_x, queen_position_y,GREEN);
+		drawBackground();
+		break;
+	case MoveConflictVerticalBack:
+		printf("queen positiony is:%d and targetpositiony is %d\n", queen_position_y, target_position_y);
+		printf("moving conflict vertical back\n");
+		if (queen_position_y < target_position_y){
+			queen_position_y++;
+		}
+		if (queen_position_y > target_position_y){
+			queen_position_y--;
+		}
+		if (queen_position_y == target_position_y){
+			state = MoveConflictHorizontalBack;
+		}
+		glutPostRedisplay();
+		drawcell(queen_position_x, queen_position_y,GREEN);
+		drawBackground();
+		break;
+	case MoveConflictHorizontalBack:
+		printf("Moving conflict horizontal back\n");
+		if (queen_position_x < target_position_x){
+			queen_position_x++;
+		}
+		if (queen_position_x > target_position_x){
+			queen_position_x--;
+		}
+		if (queen_position_x == target_position_x){
+			setSelected(newi, newj, 1);
+			state = FindHints;
+		}
+		glutPostRedisplay();
+		drawcell(queen_position_x, queen_position_y,GREEN);
+		drawBackground();
+		
+		break;
+	case FindHints:
+		findHints();
+		if (selected_cells_count < 8){
+			state = Done;//IS THIS CORRECT?
+			queen_position_x = 0;
+			queen_position_y = 0;
+		}
+		else{
+			state = Done;
+		}
+		glutPostRedisplay();
+		//drawcell(queen_position_x, queen_position_y); ?NOT necessary
+		drawBackground();
+		break;
+	case Done: break;
+	default:
+		break;
+	}
+}
 
 /******************************************************** DISPLAY SECTION *************************************************************/
 void display(void){
@@ -344,17 +650,21 @@ void display(void){
 
 	glColor3f(0, 1, 0);
 
-	drawgrid();
+
 	current_cell[0] = coordinateToIndex(mouse_x, mouse_y)[0];
 	current_cell[1] = coordinateToIndex(mouse_x, mouse_y)[1];
-	//printf("................................................................................");
+	//	printf(".........................................................\n");
 	if ((selected_cells_count < 8) && !CellinSelectedCells(current_cell[0], current_cell[1]))
-		{
-			translatequeen(current_cell[0], current_cell[1]);
+	{ if (state == Done){
+		state = ToBeStarted;
+		printf("Set state to started. State is:%d", state);
 		}
-	showSelectedCells();
+		//printf("Calling display solution!State is %d.\n", state);
+		//translatequeen(current_cell[0], current_cell[1]);
+		displaySolution();
+	}
 	glFlush();
-	
+
 }
 
 
@@ -371,7 +681,7 @@ void mouse(int button, int state, int x, int y){
 		if (mouse_y < 0){
 			mouse_y = mouse_y*-1;
 		}
-		
+
 	}
 	
 	glutPostRedisplay();
@@ -386,6 +696,7 @@ void main(int argc, char **argv){
 	gluOrtho2D(0, window_height, 0, window_height);
 	glMatrixMode(GL_MODELVIEW);
 	glutDisplayFunc(display);
+
 	glutMouseFunc(mouse);
 	glutMainLoop();
 }
@@ -412,20 +723,7 @@ When conflicting queens are added, the current queen turns red, and translates, 
 moves over to the conflicting queen and kills it, and translates back to original position. After no more choices are left, the computer
 automatically places the remaining queens.
 
-To implement conflicting queens, 
-1. Write a translate function that does translate queen(initialCoordinates, finalCoordinates). This function should determine whether to move left, right,
-	up or down, and in whichever order necessary.
-2. Write an algorithm that determines which queen is conflicting. If no current queen is conflicting, then do nothing.
-	If a current queen is conflicting, determine the path from current queen to the new queen, translate a cell from current queen to new queen, in red.
-	Then translate back to the original position.
-3. Proceed to draw hints.
-
-So overall, your function should look like:
-draw(){
-	translateQueen((0,0) to current cell, green);
-	checkConflicts();
-	drawHints(); //findSolution().
-}
 The program will be sufficiently complex after the second is implemented.
 
 */
+

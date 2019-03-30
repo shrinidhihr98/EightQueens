@@ -21,7 +21,7 @@
     <None Include="E:\solutions array generator.py" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="hintsFinder.c">
+    <ClCompile Include="conflictResolver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
