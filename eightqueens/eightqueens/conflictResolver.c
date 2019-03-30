@@ -428,6 +428,9 @@ void displaySolution(){
 		}
 		else{
 			printf("current cell is not valid!\n");
+			if (selected_cells_count > 0){
+				state = FindHints;
+			}
 		}
 		break;
 	case MoveNewRight:
