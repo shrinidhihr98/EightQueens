@@ -614,6 +614,7 @@ void mouse(int button, int state, int x, int y){
 	glutPostRedisplay();
 }
 
+
 void menu(int choice){
 	switch (choice){
 	case 1:
@@ -667,11 +668,16 @@ void menu(int choice){
 	}
 }
 
+
+void reshape(int w, int h){
+	glutReshapeWindow(600, 600);
+}
+
 void main(int argc, char **argv){
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize(window_height, window_height);
-	glutCreateWindow("Queens");
+	glutCreateWindow("Queens"); 
 	glMatrixMode(GL_PROJECTION);
 	gluOrtho2D(0, window_height, 0, window_height);
 	glMatrixMode(GL_MODELVIEW);
@@ -680,7 +686,7 @@ void main(int argc, char **argv){
 	glutAddMenuEntry("Undo", 2);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 	glutDisplayFunc(display);
-
+	glutReshapeFunc(reshape);
 	glutMouseFunc(mouse);
 	glutMainLoop();
 }
