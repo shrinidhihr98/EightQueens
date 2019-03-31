@@ -694,9 +694,9 @@ void main(int argc, char **argv){
 	glutMainLoop();
 }
 /*
-Todo: Rename list related variables later.
+Todo: Rename list related variables.
 
-#Program does not handle window resizing.
+#Program does not handle window resizing. Instead the window itself is redrawn to the original 600,600 size if resize is attempted.
 
 #First stage:
 Order:
@@ -711,9 +711,7 @@ User places a queen in the first selection. On cell selection, queens move from 
 All cells which can be a possible solution are highlighted. DONE.
 
 When conflicting queens are added, the current queen turns red, and translates, along x, and then along y,
-moves over to the conflicting queen and kills it, and translates back to original position. Done.
-After no more choices are left, the computer
-automatically places the remaining queens.
+moves over to the conflicting queen and kills it, and translates back to original position. DONE.
 
-The program will be sufficiently complex after the second is implemented.
+STAGE 2 COMPLETED!!!!!!!!!
 */
