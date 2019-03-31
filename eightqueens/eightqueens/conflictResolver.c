@@ -268,6 +268,7 @@ int* detectConflict(int conflict[], int cell_i, int cell_j){
 	for (int s = 0; s < selected_cells_count; s++){
 		A = selected_cells_array[s][1];
 		B = selected_cells_array[s][2];
+		printf("In detectConflict: A,B is %d,%d. cell_i, cell_j is %d,%d.\n", A, B, cell_i, cell_j);
 		/*Handle row or column conflicts.*/
 		if (A == cell_i || B == cell_j){
 			printf("Row or column conflict.\n");
@@ -300,7 +301,8 @@ int* detectConflict(int conflict[], int cell_i, int cell_j){
 		/*Handle conflicts along other diagonals.*/
 
 
-		if (A > B){
+		if (A >= B){
+			printf("A>B\n");
 			for (int i = 1; i < 8 - A; i++){
 				if ((cell_i == (A + i)) && (cell_j == (B - i))){
 					conflict[0] = 1;
@@ -350,13 +352,13 @@ int* detectConflict(int conflict[], int cell_i, int cell_j){
 //Draws already placed cells.
 void showSelectedCells(){
 	/*The following print can be removed.*/
-	
+	/*
 	printf("In showselectedcells(), the selectedCellsArray is:\n");
 	for (int i = 0; i < selected_cells_count; i++){
 	printf("Show: %d\t i,j : %d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1], selected_cells_array[i][2]);
 	}
 	printf("End of list.\n");
-	
+	*/
 	for (int i = 0; i < selected_cells_count; i++){
 		if (selected_cells_array[i][0] == 1){
 			//printf("Highlighting in green: %d,%d.\n", selected_cells_array[i][1], selected_cells_array[i][2]);
@@ -374,14 +376,14 @@ void addNewCelltoSelectedCells(int cell_i, int cell_j){
 	selected_cells_count++;
 
 	/*The following print can be removed.*/
-	
+	/*
 	printf("In addnewcelltoselectedcells(), the selectedcells array is now:\n");
 	for (int i = 0; i < selected_cells_count; i++){
 		printf("Show: %d\t i,j : %d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1], selected_cells_array[i][2]);
 	}
 
 	printf("End of list.\n");
-	
+	*/
 }
 //Can be used to set show or not using value = 1 or 0 respectively.
 void setSelected(int cell_i, int cell_j, int value){
