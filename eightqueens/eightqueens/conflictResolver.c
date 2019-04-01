@@ -268,7 +268,7 @@ int* detectConflict(int conflict[], int cell_i, int cell_j){
 	for (int s = 0; s < selected_cells_count; s++){
 		A = selected_cells_array[s][1];
 		B = selected_cells_array[s][2];
-		printf("In detectConflict: A,B is %d,%d. cell_i, cell_j is %d,%d.\n", A, B, cell_i, cell_j);
+		//printf("In detectConflict: A,B is %d,%d. cell_i, cell_j is %d,%d.\n", A, B, cell_i, cell_j);
 		/*Handle row or column conflicts.*/
 		if (A == cell_i || B == cell_j){
 			printf("Row or column conflict.\n");
@@ -302,7 +302,6 @@ int* detectConflict(int conflict[], int cell_i, int cell_j){
 
 
 		if (A >= B){
-			printf("A>B\n");
 			for (int i = 1; i < 8 - A; i++){
 				if ((cell_i == (A + i)) && (cell_j == (B - i))){
 					conflict[0] = 1;
