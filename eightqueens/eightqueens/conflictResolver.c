@@ -375,14 +375,14 @@ void addNewCelltoSelectedCells(int cell_i, int cell_j){
 	selected_cells_count++;
 
 	/*The following print can be removed.*/
-	/*
+	
 	printf("In addnewcelltoselectedcells(), the selectedcells array is now:\n");
 	for (int i = 0; i < selected_cells_count; i++){
 		printf("Show: %d\t i,j : %d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1], selected_cells_array[i][2]);
 	}
 
 	printf("End of list.\n");
-	*/
+	
 }
 //Can be used to set show or not using value = 1 or 0 respectively.
 void setSelected(int cell_i, int cell_j, int value){
@@ -399,7 +399,6 @@ void drawBackground(void){
 	glLoadIdentity();
 	showSelectedCells();
 	drawgrid();
-	glTranslatef(move_right, move_up, 0);
 	glPopMatrix();
 }
 
@@ -490,7 +489,6 @@ void displaySolution(){
 		break;
 	case MoveConflictHorizontal:
 
-		setSelected(conflictArray[0], conflictArray[1], 0);
 		if (queen_position_x < target_position_x){
 			queen_position_x++;
 		}
@@ -591,7 +589,6 @@ void display(void){
 	drawBackground();
 	displaySolution();
 	
-
 	glutSwapBuffers();
 
 }
