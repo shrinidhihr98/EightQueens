@@ -45,8 +45,10 @@ enum status state = Wait;
 GLfloat RED[3] = { 1, 0, 0 };
 GLfloat GREEN[3] = { 0, 1, 0 };
 GLfloat BLUE[3] = { 0, 0, 1 };
-GLfloat LIGHT_BLUE[3] = { 0, 1, 1 };
+GLfloat LIGHT_BLUE[3] = { 0.0582, 0.5901,0.97 };
 GLfloat ORANGE[3] = { 1, 0.5, 0 };
+GLfloat BLACK[3] = { 0, 0, 0 };
+GLfloat WHITE[3] = { 1, 1, 1 };
 
 /******************************************************** CONVERSION AND VALIDATION SECTION *************************************************************/
 //Converts cell indexes into Window Coordinates. WORKS
@@ -129,26 +131,13 @@ int isSolutionPossible(){
 /******************************************************** DRAWING SECTION *************************************************************/
 //Takes in coordinate points, draws lines.
 void drawline(int x1, int y1, int x2, int y2){
+	glLineWidth(1);
 	glBegin(GL_LINES);
 	glVertex2i(x1, y1);
 	glVertex2i(x2, y2);
 	glEnd();
 }
-//Draws n by n grid.
-void drawgrid(){
-	glColor3f(0, 1, 0);
-	//printf("Drawgrid(): Drawing grid at grid_left: %d, grid_bottom: %d, size %dx%d.\n", grid_left, grid_bottom, N, N);
-	int grid_right = grid_left + (N * grid_increment); //N because of N x N grid.
-	int grid_top = grid_bottom + (N * grid_increment);
 
-	for (int x = grid_left; x <= grid_right; x += grid_increment){
-		drawline(x, grid_bottom, x, grid_top);
-	}
-
-	for (int y = grid_bottom; y <= grid_top; y += grid_increment){
-		drawline(grid_left, y, grid_right, y);
-	}
-}
 //Takes in coordinate point, draws cells placing point at left bottom. Resets color to green after drawing cell.
 void drawcell(int x, int y, GLfloat* color){
 	//printf("Drawcell(): Drawing cell at x,y: %d,%d\n", x, y);
@@ -183,6 +172,71 @@ void highlightCellIndex(int cell_i, int cell_j, GLfloat* color){
 
 }
 
+
+//Draws n by n grid.
+void drawgrid(){
+	glColor3f(0, 0, 0);
+	//printf("Drawgrid(): Drawing grid at grid_left: %d, grid_bottom: %d, size %dx%d.\n", grid_left, grid_bottom, N, N);
+	int grid_right = grid_left + (N * grid_increment); //N because of N x N grid.
+	int grid_top = grid_bottom + (N * grid_increment);
+
+	for (int x = grid_left; x <= grid_right; x += grid_increment){
+		drawline(x, grid_bottom, x, grid_top);
+	}
+
+	for (int y = grid_bottom; y <= grid_top; y += grid_increment){
+		drawline(grid_left, y, grid_right, y);
+	}
+
+	for (int i = 0; i < N; i+=2){
+		for (int j = 0; j < N; j += 2){
+			if (!CellinSelectedCells(i, j)){
+				highlightCellIndex(i, j, BLACK);
+			}
+			/*
+			if (!CellinSelectedCells(i+1,j)){
+				highlightCellIndex(i + 1, j, WHITE);				
+			}
+			if (!CellinSelectedCells(i,j+1)){
+				highlightCellIndex(i, j + 1, WHITE);
+			}
+			*/
+			if (!CellinSelectedCells(i+1, j+1)){
+				highlightCellIndex(i+1, j+1, BLACK);
+			}
+
+		}
+	}
+
+	glColor3fv(RED);
+	glBegin(GL_POLYGON);
+	glVertex2i(grid_left-25, grid_bottom - 25);
+	glVertex2i(grid_right+25, grid_bottom - 25);
+	glVertex2i(grid_right+25, grid_bottom);
+	glVertex2i(grid_left-25, grid_bottom);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	glVertex2i(grid_left-25, grid_bottom - 25);
+	glVertex2i(grid_left-25, grid_top+25);
+	glVertex2i(grid_left, grid_top+25);
+	glVertex2i(grid_left, grid_bottom-25);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	glVertex2i(grid_right, grid_bottom - 25);
+	glVertex2i(grid_right+25, grid_bottom - 25);
+	glVertex2i(grid_right+25, grid_top+25);
+	glVertex2i(grid_right, grid_top+25);
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	glVertex2i(grid_left-25, grid_top);
+	glVertex2i(grid_left-25, grid_top+25);
+	glVertex2i(grid_right+25, grid_top+25);
+	glVertex2i(grid_right+25, grid_top);
+	glEnd();
+}
 
 
 /******************************************************** CIRCULAR LINKED LIST SECTION *************************************************************/
@@ -259,10 +313,12 @@ void findHints(){
 		printf("NO SOLUTION EXISTS!!!!!!!!!!!!!!\n");
 	}
 	/*Finding hints.*/
+	int possibleSolutionsCount = 0;
 	if (selected_cells_count > 0){
 		for (int k = 0; k < numberOfSolutions; k++){
 			if (solutionContainsSelected(k)){
 				printf("The solution number %d contains currently selected.\n", k);
+				possibleSolutionsCount++;
 				for (int i = 0; i < N; i++){
 					if (!CellinSelectedCells(solutions[k][i][0], solutions[k][i][1])){
 						if (hintsList->cell_i == 10){
@@ -270,10 +326,12 @@ void findHints(){
 							//printf("Appending to hintsList, solutions[%d][%d][0,1]: %d,%d.\n", k, i, solutions[k][i][0], solutions[k][i][1]);
 							hintsList->cell_i = solutions[k][i][0];
 							hintsList->cell_j = solutions[k][i][1];
+							hintsNodesCount = 1;
 						}
 						else{
 							//printf("Appending to hintsList, solutions[%d][%d][0,1]: %d,%d.\n", k,i, solutions[k][i][0], solutions[k][i][1]);
 							hintsList = hints_append(&hintsList, solutions[k][i][0], solutions[k][i][1]);
+							hintsNodesCount++;
 						}
 					}
 				}
@@ -283,6 +341,7 @@ void findHints(){
 		if (selected_cells_count < N){
 			highlightHints(&hintsList);
 		}
+
 	}
 }
 /************************************************************** CONFLICT DETECTION *****************************************************************/
@@ -382,6 +441,7 @@ void showSelectedCells(){
 	}
 	printf("End of list.\n");
 	*/
+	//printf("In showselectedcells():\n");
 	for (int i = 0; i < selected_cells_count; i++){
 		if (selected_cells_array[i][0] == 1){
 			//printf("Highlighting in green: %d,%d.\n", selected_cells_array[i][1], selected_cells_array[i][2]);
@@ -423,11 +483,8 @@ void setSelected(int cell_i, int cell_j, int value){
 
 
 void drawBackground(void){
-	glPushMatrix();
-	glLoadIdentity();
-	showSelectedCells();
-	drawgrid();
-	glPopMatrix();
+	
+
 }
 
 void displaySolution(){
@@ -610,14 +667,14 @@ void displaySolution(){
 /************************************************************** DISPLAY SECTION *******************************************************************/
 void display(void){
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0,0,0,0);
+	glClearColor(1,1,1, 0);
 
 	current_cell[0] = coordinateToIndex(mouse_x, mouse_y)[0];
 	current_cell[1] = coordinateToIndex(mouse_x, mouse_y)[1];
 	//printf("Display(): Current cell in display is: %d,%d\n", current_cell[0], current_cell[1]);
-	drawBackground();
+	drawgrid();
 	displaySolution();
-
+	showSelectedCells();
 	glutSwapBuffers();
 
 }
@@ -690,7 +747,7 @@ void grid_menu_func(int choice){
 	{
 	case 1:
 		/*Set 8 by 8 grid.*/
-		
+
 		printf("Setting up 8x8 grid!\n");
 		N = 8;
 		numberOfSolutions = 92;
@@ -698,7 +755,7 @@ void grid_menu_func(int choice){
 		//Copy solutions_8 to solutions array.
 		printf("In setting up, sizeof solutions_8 is: %d\n", sizeof solutions_8);
 		memcpy(&solutions, &solutions_8, sizeof solutions_8);
-		
+
 		grid_bottom = 100;
 		grid_left = 100;
 		reset();
@@ -707,7 +764,7 @@ void grid_menu_func(int choice){
 	case 2:
 		/*Set 4 by 4 grid.*/
 		printf("Setting up 4x4 grid!\n");
-		
+
 		N = 4;
 		numberOfSolutions = 2;
 
@@ -809,14 +866,10 @@ Stage 3:
 Implement the solutions for 8 queens and 4 queens by converting explict calculations related to '8', into general calculations,
 and integrate via menus. DONE.
 
-Change colors for grid. Make a chequered grid. Put in more colors. Maybe even set a background color. Choose an attractive color scheme. Add text to show
+Change colors for grid. Make a chequered grid. Done.
+Put in more colors. Maybe even set a background color. Choose an attractive color scheme. Add text to show
 current state of game.
 
-To do this, set a pointer to solutions_4, and solutions_8, and use whichever necessary. Also bind the pointer to max of 92 or 2.
-Create buttons on screen to choose.Catch option by click coordinates and find 8x8 or 4x4 board.
-There initialize the grid_left, grid_bottom, and solutions***. Find out how to set the triple pointer. Draw grid.
-Then go to wait state.
-
-Set a white background.
+Set a white background. Make border.
 
 */
