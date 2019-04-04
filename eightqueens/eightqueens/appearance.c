@@ -14,8 +14,8 @@ int grid_bottom = 100;
 int grid_left = 100;
 int grid_increment = 50;
 
-int queen_position_x = 0;
-int queen_position_y = 0;
+int queen_position_x = 100;
+int queen_position_y = 100;
 
 int target_position_x = 0, target_position_y = 0;
 
@@ -481,12 +481,6 @@ void setSelected(int cell_i, int cell_j, int value){
 
 /******************************************DISPLAYING SOLUTIONS******************************************************/
 
-
-void drawBackground(void){
-	
-
-}
-
 void displaySolution(){
 	for (int it = 0; it < 1000; it++){
 		for (int jt = 0; jt < 1000; jt++);
@@ -515,6 +509,7 @@ void displaySolution(){
 				printf("No new cell.\n");
 				if (selected_cells_count > 0){
 					state = FindHints;
+					glutPostRedisplay();
 				}
 			}
 		}
@@ -649,10 +644,17 @@ void displaySolution(){
 
 	case FindHints:
 		if (selected_cells_count < N){
-			state = Wait;
-			queen_position_x = 0;
-			queen_position_y = 0;
 			findHints();
+			state = Wait;
+			if (N == 8){
+				queen_position_x = 100;
+				queen_position_y = 100;
+			}
+			if (N == 4){
+				queen_position_x = 200;
+				queen_position_y = 200;
+			}
+			
 		}
 		else{
 			state = Done;
@@ -722,8 +724,15 @@ void reset(){
 	newi = 0;
 	newj = 0;
 
-	queen_position_x = 0;
-	queen_position_y = 0;
+	if (N == 8){
+		queen_position_x = 100;
+		queen_position_y = 100;
+	}
+	if (N == 4){
+		queen_position_x = 200;
+		queen_position_y = 200;
+	}
+
 
 	target_position_x = 0;
 	target_position_y = 0;
@@ -867,9 +876,10 @@ Implement the solutions for 8 queens and 4 queens by converting explict calculat
 and integrate via menus. DONE.
 
 Change colors for grid. Make a chequered grid. Done.
-Put in more colors. Maybe even set a background color. Choose an attractive color scheme. Add text to show
-current state of game.
+Put in more colors. Maybe even set a background color. Choose an attractive color scheme. 
+Implement simple UI elements.
+Add text to show current state of game.
 
-Set a white background. Make border.
+Set a white background. Make border. Done.
 
 */
