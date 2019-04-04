@@ -1,12 +1,15 @@
 #include<stdlib.h> //Has to be placed above glut.h line; otherwise raises error C2381:'exit':redefinition.
 #include<GL/glut.h>
 #include<stdio.h>
+#include<string.h>
 
 int window_height = 600;
 
 int mouse_x = 0;
 int mouse_y = 0;
 
+int N = 8;
+int numberOfSolutions = 92;
 int grid_bottom = 100;
 int grid_left = 100;
 int grid_increment = 50;
@@ -25,10 +28,13 @@ int conflictArray[3] = { 0, 0, 0 };
 int move_right = 1;
 int move_up = 0;
 
+int solutions_8[92][8][2] = { { { 0, 1 }, { 1, 3 }, { 2, 5 }, { 3, 7 }, { 4, 2 }, { 5, 0 }, { 6, 6 }, { 7, 4 } }, { { 0, 2 }, { 1, 7 }, { 2, 3 }, { 3, 6 }, { 4, 0 }, { 5, 5 }, { 6, 1 }, { 7, 4 } }, { { 0, 3 }, { 1, 1 }, { 2, 7 }, { 3, 5 }, { 4, 0 }, { 5, 2 }, { 6, 4 }, { 7, 6 } }, { { 0, 3 }, { 1, 6 }, { 2, 2 }, { 3, 7 }, { 4, 1 }, { 5, 4 }, { 6, 0 }, { 7, 5 } }, { { 0, 5 }, { 1, 0 }, { 2, 4 }, { 3, 1 }, { 4, 7 }, { 5, 2 }, { 6, 6 }, { 7, 3 } }, { { 0, 4 }, { 1, 6 }, { 2, 0 }, { 3, 2 }, { 4, 7 }, { 5, 5 }, { 6, 3 }, { 7, 1 } }, { { 0, 4 }, { 1, 1 }, { 2, 5 }, { 3, 0 }, { 4, 6 }, { 5, 3 }, { 6, 7 }, { 7, 2 } }, { { 0, 6 }, { 1, 4 }, { 2, 2 }, { 3, 0 }, { 4, 5 }, { 5, 7 }, { 6, 1 }, { 7, 3 } }, { { 0, 0 }, { 1, 6 }, { 2, 3 }, { 3, 5 }, { 4, 7 }, { 5, 1 }, { 6, 4 }, { 7, 2 } }, { { 0, 7 }, { 1, 2 }, { 2, 0 }, { 3, 5 }, { 4, 1 }, { 5, 4 }, { 6, 6 }, { 7, 3 } }, { { 0, 5 }, { 1, 3 }, { 2, 6 }, { 3, 0 }, { 4, 2 }, { 5, 4 }, { 6, 1 }, { 7, 7 } }, { { 0, 4 }, { 1, 1 }, { 2, 3 }, { 3, 6 }, { 4, 2 }, { 5, 7 }, { 6, 5 }, { 7, 0 } }, { { 0, 0 }, { 1, 5 }, { 2, 7 }, { 3, 2 }, { 4, 6 }, { 5, 3 }, { 6, 1 }, { 7, 4 } }, { { 0, 2 }, { 1, 4 }, { 2, 1 }, { 3, 7 }, { 4, 5 }, { 5, 3 }, { 6, 6 }, { 7, 0 } }, { { 0, 3 }, { 1, 6 }, { 2, 4 }, { 3, 1 }, { 4, 5 }, { 5, 0 }, { 6, 2 }, { 7, 7 } }, { { 0, 7 }, { 1, 1 }, { 2, 4 }, { 3, 2 }, { 4, 0 }, { 5, 6 }, { 6, 3 }, { 7, 5 } }, { { 0, 0 }, { 1, 6 }, { 2, 4 }, { 3, 7 }, { 4, 1 }, { 5, 3 }, { 6, 5 }, { 7, 2 } }, { { 0, 7 }, { 1, 3 }, { 2, 0 }, { 3, 2 }, { 4, 5 }, { 5, 1 }, { 6, 6 }, { 7, 4 } }, { { 0, 5 }, { 1, 2 }, { 2, 4 }, { 3, 6 }, { 4, 0 }, { 5, 3 }, { 6, 1 }, { 7, 7 } }, { { 0, 3 }, { 1, 1 }, { 2, 6 }, { 3, 2 }, { 4, 5 }, { 5, 7 }, { 6, 4 }, { 7, 0 } }, { { 0, 0 }, { 1, 4 }, { 2, 7 }, { 3, 5 }, { 4, 2 }, { 5, 6 }, { 6, 1 }, { 7, 3 } }, { { 0, 2 }, { 1, 5 }, { 2, 3 }, { 3, 1 }, { 4, 7 }, { 5, 4 }, { 6, 6 }, { 7, 0 } }, { { 0, 4 }, { 1, 6 }, { 2, 1 }, { 3, 5 }, { 4, 2 }, { 5, 0 }, { 6, 3 }, { 7, 7 } }, { { 0, 7 }, { 1, 1 }, { 2, 3 }, { 3, 0 }, { 4, 6 }, { 5, 4 }, { 6, 2 }, { 7, 5 } }, { { 0, 3 }, { 1, 0 }, { 2, 4 }, { 3, 7 }, { 4, 1 }, { 5, 6 }, { 6, 2 }, { 7, 5 } }, { { 0, 6 }, { 1, 3 }, { 2, 1 }, { 3, 7 }, { 4, 5 }, { 5, 0 }, { 6, 2 }, { 7, 4 } }, { { 0, 2 }, { 1, 5 }, { 2, 1 }, { 3, 6 }, { 4, 0 }, { 5, 3 }, { 6, 7 }, { 7, 4 } }, { { 0, 3 }, { 1, 5 }, { 2, 7 }, { 3, 2 }, { 4, 0 }, { 5, 6 }, { 6, 4 }, { 7, 1 } }, { { 0, 1 }, { 1, 4 }, { 2, 6 }, { 3, 0 }, { 4, 2 }, { 5, 7 }, { 6, 5 }, { 7, 3 } }, { { 0, 5 }, { 1, 2 }, { 2, 6 }, { 3, 1 }, { 4, 7 }, { 5, 4 }, { 6, 0 }, { 7, 3 } }, { { 0, 4 }, { 1, 2 }, { 2, 0 }, { 3, 5 }, { 4, 7 }, { 5, 1 }, { 6, 3 }, { 7, 6 } }, { { 0, 4 }, { 1, 7 }, { 2, 3 }, { 3, 0 }, { 4, 6 }, { 5, 1 }, { 6, 5 }, { 7, 2 } }, { { 0, 4 }, { 1, 0 }, { 2, 7 }, { 3, 3 }, { 4, 1 }, { 5, 6 }, { 6, 2 }, { 7, 5 } }, { { 0, 6 }, { 1, 3 }, { 2, 1 }, { 3, 4 }, { 4, 7 }, { 5, 0 }, { 6, 2 }, { 7, 5 } }, { { 0, 2 }, { 1, 5 }, { 2, 1 }, { 3, 6 }, { 4, 4 }, { 5, 0 }, { 6, 7 }, { 7, 3 } }, { { 0, 2 }, { 1, 5 }, { 2, 7 }, { 3, 0 }, { 4, 3 }, { 5, 6 }, { 6, 4 }, { 7, 1 } }, { { 0, 1 }, { 1, 4 }, { 2, 6 }, { 3, 3 }, { 4, 0 }, { 5, 7 }, { 6, 5 }, { 7, 2 } }, { { 0, 5 }, { 1, 2 }, { 2, 6 }, { 3, 1 }, { 4, 3 }, { 5, 7 }, { 6, 0 }, { 7, 4 } }, { { 0, 5 }, { 1, 2 }, { 2, 0 }, { 3, 7 }, { 4, 4 }, { 5, 1 }, { 6, 3 }, { 7, 6 } }, { { 0, 3 }, { 1, 7 }, { 2, 0 }, { 3, 4 }, { 4, 6 }, { 5, 1 }, { 6, 5 }, { 7, 2 } }, { { 0, 2 }, { 1, 0 }, { 2, 6 }, { 3, 4 }, { 4, 7 }, { 5, 1 }, { 6, 3 }, { 7, 5 } }, { { 0, 6 }, { 1, 2 }, { 2, 7 }, { 3, 1 }, { 4, 4 }, { 5, 0 }, { 6, 5 }, { 7, 3 } }, { { 0, 2 }, { 1, 4 }, { 2, 6 }, { 3, 0 }, { 4, 3 }, { 5, 1 }, { 6, 7 }, { 7, 5 } }, { { 0, 4 }, { 1, 2 }, { 2, 7 }, { 3, 3 }, { 4, 6 }, { 5, 0 }, { 6, 5 }, { 7, 1 } }, { { 0, 1 }, { 1, 5 }, { 2, 0 }, { 3, 6 }, { 4, 3 }, { 5, 7 }, { 6, 2 }, { 7, 4 } }, { { 0, 5 }, { 1, 3 }, { 2, 1 }, { 3, 7 }, { 4, 4 }, { 5, 6 }, { 6, 0 }, { 7, 2 } }, { { 0, 3 }, { 1, 5 }, { 2, 0 }, { 3, 4 }, { 4, 1 }, { 5, 7 }, { 6, 2 }, { 7, 6 } }, { { 0, 5 }, { 1, 7 }, { 2, 1 }, { 3, 3 }, { 4, 0 }, { 5, 6 }, { 6, 4 }, { 7, 2 } }, { { 0, 4 }, { 1, 0 }, { 2, 3 }, { 3, 5 }, { 4, 7 }, { 5, 1 }, { 6, 6 }, { 7, 2 } }, { { 0, 6 }, { 1, 2 }, { 2, 0 }, { 3, 5 }, { 4, 7 }, { 5, 4 }, { 6, 1 }, { 7, 3 } }, { { 0, 5 }, { 1, 1 }, { 2, 6 }, { 3, 0 }, { 4, 2 }, { 5, 4 }, { 6, 7 }, { 7, 3 } }, { { 0, 4 }, { 1, 6 }, { 2, 3 }, { 3, 0 }, { 4, 2 }, { 5, 7 }, { 6, 5 }, { 7, 1 } }, { { 0, 1 }, { 1, 5 }, { 2, 7 }, { 3, 2 }, { 4, 0 }, { 5, 3 }, { 6, 6 }, { 7, 4 } }, { { 0, 2 }, { 1, 6 }, { 2, 1 }, { 3, 7 }, { 4, 5 }, { 5, 3 }, { 6, 0 }, { 7, 4 } }, { { 0, 3 }, { 1, 1 }, { 2, 4 }, { 3, 7 }, { 4, 5 }, { 5, 0 }, { 6, 2 }, { 7, 6 } }, { { 0, 3 }, { 1, 7 }, { 2, 4 }, { 3, 2 }, { 4, 0 }, { 5, 6 }, { 6, 1 }, { 7, 5 } }, { { 0, 6 }, { 1, 0 }, { 2, 2 }, { 3, 7 }, { 4, 5 }, { 5, 3 }, { 6, 1 }, { 7, 4 } }, { { 0, 6 }, { 1, 1 }, { 2, 5 }, { 3, 2 }, { 4, 0 }, { 5, 3 }, { 6, 7 }, { 7, 4 } }, { { 0, 3 }, { 1, 6 }, { 2, 4 }, { 3, 2 }, { 4, 0 }, { 5, 5 }, { 6, 7 }, { 7, 1 } }, { { 0, 3 }, { 1, 0 }, { 2, 4 }, { 3, 7 }, { 4, 5 }, { 5, 2 }, { 6, 6 }, { 7, 1 } }, { { 0, 1 }, { 1, 6 }, { 2, 2 }, { 3, 5 }, { 4, 7 }, { 5, 4 }, { 6, 0 }, { 7, 3 } }, { { 0, 4 }, { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 7 }, { 5, 2 }, { 6, 0 }, { 7, 6 } }, { { 0, 4 }, { 1, 7 }, { 2, 3 }, { 3, 0 }, { 4, 2 }, { 5, 5 }, { 6, 1 }, { 7, 6 } }, { { 0, 1 }, { 1, 7 }, { 2, 5 }, { 3, 0 }, { 4, 2 }, { 5, 4 }, { 6, 6 }, { 7, 3 } }, { { 0, 4 }, { 1, 0 }, { 2, 7 }, { 3, 5 }, { 4, 2 }, { 5, 6 }, { 6, 1 }, { 7, 3 } }, { { 0, 6 }, { 1, 1 }, { 2, 3 }, { 3, 0 }, { 4, 7 }, { 5, 4 }, { 6, 2 }, { 7, 5 } }, { { 0, 4 }, { 1, 6 }, { 2, 1 }, { 3, 5 }, { 4, 2 }, { 5, 0 }, { 6, 7 }, { 7, 3 } }, { { 0, 2 }, { 1, 5 }, { 2, 3 }, { 3, 0 }, { 4, 7 }, { 5, 4 }, { 6, 6 }, { 7, 1 } }, { { 0, 1 }, { 1, 6 }, { 2, 4 }, { 3, 7 }, { 4, 0 }, { 5, 3 }, { 6, 5 }, { 7, 2 } }, { { 0, 3 }, { 1, 1 }, { 2, 6 }, { 3, 2 }, { 4, 5 }, { 5, 7 }, { 6, 0 }, { 7, 4 } }, { { 0, 5 }, { 1, 2 }, { 2, 4 }, { 3, 7 }, { 4, 0 }, { 5, 3 }, { 6, 1 }, { 7, 6 } }, { { 0, 3 }, { 1, 7 }, { 2, 0 }, { 3, 2 }, { 4, 5 }, { 5, 1 }, { 6, 6 }, { 7, 4 } }, { { 0, 4 }, { 1, 6 }, { 2, 0 }, { 3, 3 }, { 4, 1 }, { 5, 7 }, { 6, 5 }, { 7, 2 } }, { { 0, 5 }, { 1, 3 }, { 2, 0 }, { 3, 4 }, { 4, 7 }, { 5, 1 }, { 6, 6 }, { 7, 2 } }, { { 0, 5 }, { 1, 2 }, { 2, 0 }, { 3, 6 }, { 4, 4 }, { 5, 7 }, { 6, 1 }, { 7, 3 } }, { { 0, 5 }, { 1, 1 }, { 2, 6 }, { 3, 0 }, { 4, 3 }, { 5, 7 }, { 6, 4 }, { 7, 2 } }, { { 0, 2 }, { 1, 4 }, { 2, 7 }, { 3, 3 }, { 4, 0 }, { 5, 6 }, { 6, 1 }, { 7, 5 } }, { { 0, 2 }, { 1, 5 }, { 2, 7 }, { 3, 1 }, { 4, 3 }, { 5, 0 }, { 6, 6 }, { 7, 4 } }, { { 0, 2 }, { 1, 6 }, { 2, 1 }, { 3, 7 }, { 4, 4 }, { 5, 0 }, { 6, 3 }, { 7, 5 } }, { { 0, 3 }, { 1, 1 }, { 2, 7 }, { 3, 4 }, { 4, 6 }, { 5, 0 }, { 6, 2 }, { 7, 5 } }, { { 0, 5 }, { 1, 2 }, { 2, 0 }, { 3, 7 }, { 4, 3 }, { 5, 1 }, { 6, 6 }, { 7, 4 } }, { { 0, 5 }, { 1, 2 }, { 2, 6 }, { 3, 3 }, { 4, 0 }, { 5, 7 }, { 6, 1 }, { 7, 4 } }, { { 0, 3 }, { 1, 1 }, { 2, 6 }, { 3, 4 }, { 4, 0 }, { 5, 7 }, { 6, 5 }, { 7, 2 } }, { { 0, 3 }, { 1, 6 }, { 2, 0 }, { 3, 7 }, { 4, 4 }, { 5, 1 }, { 6, 5 }, { 7, 2 } }, { { 0, 2 }, { 1, 5 }, { 2, 1 }, { 3, 4 }, { 4, 7 }, { 5, 0 }, { 6, 6 }, { 7, 3 } }, { { 0, 4 }, { 1, 6 }, { 2, 1 }, { 3, 3 }, { 4, 7 }, { 5, 0 }, { 6, 2 }, { 7, 5 } }, { { 0, 4 }, { 1, 1 }, { 2, 7 }, { 3, 0 }, { 4, 3 }, { 5, 6 }, { 6, 2 }, { 7, 5 } }, { { 0, 2 }, { 1, 5 }, { 2, 7 }, { 3, 0 }, { 4, 4 }, { 5, 6 }, { 6, 1 }, { 7, 3 } }, { { 0, 4 }, { 1, 0 }, { 2, 7 }, { 3, 5 }, { 4, 2 }, { 5, 6 }, { 6, 1 }, { 7, 3 } }, { { 0, 6 }, { 1, 1 }, { 2, 3 }, { 3, 0 }, { 4, 7 }, { 5, 4 }, { 6, 2 }, { 7, 5 } }, { { 0, 4 }, { 1, 6 }, { 2, 1 }, { 3, 5 }, { 4, 2 }, { 5, 0 }, { 6, 7 }, { 7, 3 } }, { { 0, 2 }, { 1, 5 }, { 2, 3 }, { 3, 0 }, { 4, 7 }, { 5, 4 }, { 6, 6 }, { 7, 1 } } };
+int solutions_4[2][4][2] = { { { 0, 1 }, { 1, 3 }, { 2, 0 }, { 3, 2 } }, { { 0, 2 }, { 1, 0 }, { 2, 3 }, { 3, 1 } } };
 int solutions[92][8][2] = { { { 0, 1 }, { 1, 3 }, { 2, 5 }, { 3, 7 }, { 4, 2 }, { 5, 0 }, { 6, 6 }, { 7, 4 } }, { { 0, 2 }, { 1, 7 }, { 2, 3 }, { 3, 6 }, { 4, 0 }, { 5, 5 }, { 6, 1 }, { 7, 4 } }, { { 0, 3 }, { 1, 1 }, { 2, 7 }, { 3, 5 }, { 4, 0 }, { 5, 2 }, { 6, 4 }, { 7, 6 } }, { { 0, 3 }, { 1, 6 }, { 2, 2 }, { 3, 7 }, { 4, 1 }, { 5, 4 }, { 6, 0 }, { 7, 5 } }, { { 0, 5 }, { 1, 0 }, { 2, 4 }, { 3, 1 }, { 4, 7 }, { 5, 2 }, { 6, 6 }, { 7, 3 } }, { { 0, 4 }, { 1, 6 }, { 2, 0 }, { 3, 2 }, { 4, 7 }, { 5, 5 }, { 6, 3 }, { 7, 1 } }, { { 0, 4 }, { 1, 1 }, { 2, 5 }, { 3, 0 }, { 4, 6 }, { 5, 3 }, { 6, 7 }, { 7, 2 } }, { { 0, 6 }, { 1, 4 }, { 2, 2 }, { 3, 0 }, { 4, 5 }, { 5, 7 }, { 6, 1 }, { 7, 3 } }, { { 0, 0 }, { 1, 6 }, { 2, 3 }, { 3, 5 }, { 4, 7 }, { 5, 1 }, { 6, 4 }, { 7, 2 } }, { { 0, 7 }, { 1, 2 }, { 2, 0 }, { 3, 5 }, { 4, 1 }, { 5, 4 }, { 6, 6 }, { 7, 3 } }, { { 0, 5 }, { 1, 3 }, { 2, 6 }, { 3, 0 }, { 4, 2 }, { 5, 4 }, { 6, 1 }, { 7, 7 } }, { { 0, 4 }, { 1, 1 }, { 2, 3 }, { 3, 6 }, { 4, 2 }, { 5, 7 }, { 6, 5 }, { 7, 0 } }, { { 0, 0 }, { 1, 5 }, { 2, 7 }, { 3, 2 }, { 4, 6 }, { 5, 3 }, { 6, 1 }, { 7, 4 } }, { { 0, 2 }, { 1, 4 }, { 2, 1 }, { 3, 7 }, { 4, 5 }, { 5, 3 }, { 6, 6 }, { 7, 0 } }, { { 0, 3 }, { 1, 6 }, { 2, 4 }, { 3, 1 }, { 4, 5 }, { 5, 0 }, { 6, 2 }, { 7, 7 } }, { { 0, 7 }, { 1, 1 }, { 2, 4 }, { 3, 2 }, { 4, 0 }, { 5, 6 }, { 6, 3 }, { 7, 5 } }, { { 0, 0 }, { 1, 6 }, { 2, 4 }, { 3, 7 }, { 4, 1 }, { 5, 3 }, { 6, 5 }, { 7, 2 } }, { { 0, 7 }, { 1, 3 }, { 2, 0 }, { 3, 2 }, { 4, 5 }, { 5, 1 }, { 6, 6 }, { 7, 4 } }, { { 0, 5 }, { 1, 2 }, { 2, 4 }, { 3, 6 }, { 4, 0 }, { 5, 3 }, { 6, 1 }, { 7, 7 } }, { { 0, 3 }, { 1, 1 }, { 2, 6 }, { 3, 2 }, { 4, 5 }, { 5, 7 }, { 6, 4 }, { 7, 0 } }, { { 0, 0 }, { 1, 4 }, { 2, 7 }, { 3, 5 }, { 4, 2 }, { 5, 6 }, { 6, 1 }, { 7, 3 } }, { { 0, 2 }, { 1, 5 }, { 2, 3 }, { 3, 1 }, { 4, 7 }, { 5, 4 }, { 6, 6 }, { 7, 0 } }, { { 0, 4 }, { 1, 6 }, { 2, 1 }, { 3, 5 }, { 4, 2 }, { 5, 0 }, { 6, 3 }, { 7, 7 } }, { { 0, 7 }, { 1, 1 }, { 2, 3 }, { 3, 0 }, { 4, 6 }, { 5, 4 }, { 6, 2 }, { 7, 5 } }, { { 0, 3 }, { 1, 0 }, { 2, 4 }, { 3, 7 }, { 4, 1 }, { 5, 6 }, { 6, 2 }, { 7, 5 } }, { { 0, 6 }, { 1, 3 }, { 2, 1 }, { 3, 7 }, { 4, 5 }, { 5, 0 }, { 6, 2 }, { 7, 4 } }, { { 0, 2 }, { 1, 5 }, { 2, 1 }, { 3, 6 }, { 4, 0 }, { 5, 3 }, { 6, 7 }, { 7, 4 } }, { { 0, 3 }, { 1, 5 }, { 2, 7 }, { 3, 2 }, { 4, 0 }, { 5, 6 }, { 6, 4 }, { 7, 1 } }, { { 0, 1 }, { 1, 4 }, { 2, 6 }, { 3, 0 }, { 4, 2 }, { 5, 7 }, { 6, 5 }, { 7, 3 } }, { { 0, 5 }, { 1, 2 }, { 2, 6 }, { 3, 1 }, { 4, 7 }, { 5, 4 }, { 6, 0 }, { 7, 3 } }, { { 0, 4 }, { 1, 2 }, { 2, 0 }, { 3, 5 }, { 4, 7 }, { 5, 1 }, { 6, 3 }, { 7, 6 } }, { { 0, 4 }, { 1, 7 }, { 2, 3 }, { 3, 0 }, { 4, 6 }, { 5, 1 }, { 6, 5 }, { 7, 2 } }, { { 0, 4 }, { 1, 0 }, { 2, 7 }, { 3, 3 }, { 4, 1 }, { 5, 6 }, { 6, 2 }, { 7, 5 } }, { { 0, 6 }, { 1, 3 }, { 2, 1 }, { 3, 4 }, { 4, 7 }, { 5, 0 }, { 6, 2 }, { 7, 5 } }, { { 0, 2 }, { 1, 5 }, { 2, 1 }, { 3, 6 }, { 4, 4 }, { 5, 0 }, { 6, 7 }, { 7, 3 } }, { { 0, 2 }, { 1, 5 }, { 2, 7 }, { 3, 0 }, { 4, 3 }, { 5, 6 }, { 6, 4 }, { 7, 1 } }, { { 0, 1 }, { 1, 4 }, { 2, 6 }, { 3, 3 }, { 4, 0 }, { 5, 7 }, { 6, 5 }, { 7, 2 } }, { { 0, 5 }, { 1, 2 }, { 2, 6 }, { 3, 1 }, { 4, 3 }, { 5, 7 }, { 6, 0 }, { 7, 4 } }, { { 0, 5 }, { 1, 2 }, { 2, 0 }, { 3, 7 }, { 4, 4 }, { 5, 1 }, { 6, 3 }, { 7, 6 } }, { { 0, 3 }, { 1, 7 }, { 2, 0 }, { 3, 4 }, { 4, 6 }, { 5, 1 }, { 6, 5 }, { 7, 2 } }, { { 0, 2 }, { 1, 0 }, { 2, 6 }, { 3, 4 }, { 4, 7 }, { 5, 1 }, { 6, 3 }, { 7, 5 } }, { { 0, 6 }, { 1, 2 }, { 2, 7 }, { 3, 1 }, { 4, 4 }, { 5, 0 }, { 6, 5 }, { 7, 3 } }, { { 0, 2 }, { 1, 4 }, { 2, 6 }, { 3, 0 }, { 4, 3 }, { 5, 1 }, { 6, 7 }, { 7, 5 } }, { { 0, 4 }, { 1, 2 }, { 2, 7 }, { 3, 3 }, { 4, 6 }, { 5, 0 }, { 6, 5 }, { 7, 1 } }, { { 0, 1 }, { 1, 5 }, { 2, 0 }, { 3, 6 }, { 4, 3 }, { 5, 7 }, { 6, 2 }, { 7, 4 } }, { { 0, 5 }, { 1, 3 }, { 2, 1 }, { 3, 7 }, { 4, 4 }, { 5, 6 }, { 6, 0 }, { 7, 2 } }, { { 0, 3 }, { 1, 5 }, { 2, 0 }, { 3, 4 }, { 4, 1 }, { 5, 7 }, { 6, 2 }, { 7, 6 } }, { { 0, 5 }, { 1, 7 }, { 2, 1 }, { 3, 3 }, { 4, 0 }, { 5, 6 }, { 6, 4 }, { 7, 2 } }, { { 0, 4 }, { 1, 0 }, { 2, 3 }, { 3, 5 }, { 4, 7 }, { 5, 1 }, { 6, 6 }, { 7, 2 } }, { { 0, 6 }, { 1, 2 }, { 2, 0 }, { 3, 5 }, { 4, 7 }, { 5, 4 }, { 6, 1 }, { 7, 3 } }, { { 0, 5 }, { 1, 1 }, { 2, 6 }, { 3, 0 }, { 4, 2 }, { 5, 4 }, { 6, 7 }, { 7, 3 } }, { { 0, 4 }, { 1, 6 }, { 2, 3 }, { 3, 0 }, { 4, 2 }, { 5, 7 }, { 6, 5 }, { 7, 1 } }, { { 0, 1 }, { 1, 5 }, { 2, 7 }, { 3, 2 }, { 4, 0 }, { 5, 3 }, { 6, 6 }, { 7, 4 } }, { { 0, 2 }, { 1, 6 }, { 2, 1 }, { 3, 7 }, { 4, 5 }, { 5, 3 }, { 6, 0 }, { 7, 4 } }, { { 0, 3 }, { 1, 1 }, { 2, 4 }, { 3, 7 }, { 4, 5 }, { 5, 0 }, { 6, 2 }, { 7, 6 } }, { { 0, 3 }, { 1, 7 }, { 2, 4 }, { 3, 2 }, { 4, 0 }, { 5, 6 }, { 6, 1 }, { 7, 5 } }, { { 0, 6 }, { 1, 0 }, { 2, 2 }, { 3, 7 }, { 4, 5 }, { 5, 3 }, { 6, 1 }, { 7, 4 } }, { { 0, 6 }, { 1, 1 }, { 2, 5 }, { 3, 2 }, { 4, 0 }, { 5, 3 }, { 6, 7 }, { 7, 4 } }, { { 0, 3 }, { 1, 6 }, { 2, 4 }, { 3, 2 }, { 4, 0 }, { 5, 5 }, { 6, 7 }, { 7, 1 } }, { { 0, 3 }, { 1, 0 }, { 2, 4 }, { 3, 7 }, { 4, 5 }, { 5, 2 }, { 6, 6 }, { 7, 1 } }, { { 0, 1 }, { 1, 6 }, { 2, 2 }, { 3, 5 }, { 4, 7 }, { 5, 4 }, { 6, 0 }, { 7, 3 } }, { { 0, 4 }, { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 7 }, { 5, 2 }, { 6, 0 }, { 7, 6 } }, { { 0, 4 }, { 1, 7 }, { 2, 3 }, { 3, 0 }, { 4, 2 }, { 5, 5 }, { 6, 1 }, { 7, 6 } }, { { 0, 1 }, { 1, 7 }, { 2, 5 }, { 3, 0 }, { 4, 2 }, { 5, 4 }, { 6, 6 }, { 7, 3 } }, { { 0, 4 }, { 1, 0 }, { 2, 7 }, { 3, 5 }, { 4, 2 }, { 5, 6 }, { 6, 1 }, { 7, 3 } }, { { 0, 6 }, { 1, 1 }, { 2, 3 }, { 3, 0 }, { 4, 7 }, { 5, 4 }, { 6, 2 }, { 7, 5 } }, { { 0, 4 }, { 1, 6 }, { 2, 1 }, { 3, 5 }, { 4, 2 }, { 5, 0 }, { 6, 7 }, { 7, 3 } }, { { 0, 2 }, { 1, 5 }, { 2, 3 }, { 3, 0 }, { 4, 7 }, { 5, 4 }, { 6, 6 }, { 7, 1 } }, { { 0, 1 }, { 1, 6 }, { 2, 4 }, { 3, 7 }, { 4, 0 }, { 5, 3 }, { 6, 5 }, { 7, 2 } }, { { 0, 3 }, { 1, 1 }, { 2, 6 }, { 3, 2 }, { 4, 5 }, { 5, 7 }, { 6, 0 }, { 7, 4 } }, { { 0, 5 }, { 1, 2 }, { 2, 4 }, { 3, 7 }, { 4, 0 }, { 5, 3 }, { 6, 1 }, { 7, 6 } }, { { 0, 3 }, { 1, 7 }, { 2, 0 }, { 3, 2 }, { 4, 5 }, { 5, 1 }, { 6, 6 }, { 7, 4 } }, { { 0, 4 }, { 1, 6 }, { 2, 0 }, { 3, 3 }, { 4, 1 }, { 5, 7 }, { 6, 5 }, { 7, 2 } }, { { 0, 5 }, { 1, 3 }, { 2, 0 }, { 3, 4 }, { 4, 7 }, { 5, 1 }, { 6, 6 }, { 7, 2 } }, { { 0, 5 }, { 1, 2 }, { 2, 0 }, { 3, 6 }, { 4, 4 }, { 5, 7 }, { 6, 1 }, { 7, 3 } }, { { 0, 5 }, { 1, 1 }, { 2, 6 }, { 3, 0 }, { 4, 3 }, { 5, 7 }, { 6, 4 }, { 7, 2 } }, { { 0, 2 }, { 1, 4 }, { 2, 7 }, { 3, 3 }, { 4, 0 }, { 5, 6 }, { 6, 1 }, { 7, 5 } }, { { 0, 2 }, { 1, 5 }, { 2, 7 }, { 3, 1 }, { 4, 3 }, { 5, 0 }, { 6, 6 }, { 7, 4 } }, { { 0, 2 }, { 1, 6 }, { 2, 1 }, { 3, 7 }, { 4, 4 }, { 5, 0 }, { 6, 3 }, { 7, 5 } }, { { 0, 3 }, { 1, 1 }, { 2, 7 }, { 3, 4 }, { 4, 6 }, { 5, 0 }, { 6, 2 }, { 7, 5 } }, { { 0, 5 }, { 1, 2 }, { 2, 0 }, { 3, 7 }, { 4, 3 }, { 5, 1 }, { 6, 6 }, { 7, 4 } }, { { 0, 5 }, { 1, 2 }, { 2, 6 }, { 3, 3 }, { 4, 0 }, { 5, 7 }, { 6, 1 }, { 7, 4 } }, { { 0, 3 }, { 1, 1 }, { 2, 6 }, { 3, 4 }, { 4, 0 }, { 5, 7 }, { 6, 5 }, { 7, 2 } }, { { 0, 3 }, { 1, 6 }, { 2, 0 }, { 3, 7 }, { 4, 4 }, { 5, 1 }, { 6, 5 }, { 7, 2 } }, { { 0, 2 }, { 1, 5 }, { 2, 1 }, { 3, 4 }, { 4, 7 }, { 5, 0 }, { 6, 6 }, { 7, 3 } }, { { 0, 4 }, { 1, 6 }, { 2, 1 }, { 3, 3 }, { 4, 7 }, { 5, 0 }, { 6, 2 }, { 7, 5 } }, { { 0, 4 }, { 1, 1 }, { 2, 7 }, { 3, 0 }, { 4, 3 }, { 5, 6 }, { 6, 2 }, { 7, 5 } }, { { 0, 2 }, { 1, 5 }, { 2, 7 }, { 3, 0 }, { 4, 4 }, { 5, 6 }, { 6, 1 }, { 7, 3 } }, { { 0, 4 }, { 1, 0 }, { 2, 7 }, { 3, 5 }, { 4, 2 }, { 5, 6 }, { 6, 1 }, { 7, 3 } }, { { 0, 6 }, { 1, 1 }, { 2, 3 }, { 3, 0 }, { 4, 7 }, { 5, 4 }, { 6, 2 }, { 7, 5 } }, { { 0, 4 }, { 1, 6 }, { 2, 1 }, { 3, 5 }, { 4, 2 }, { 5, 0 }, { 6, 7 }, { 7, 3 } }, { { 0, 2 }, { 1, 5 }, { 2, 3 }, { 3, 0 }, { 4, 7 }, { 5, 4 }, { 6, 6 }, { 7, 1 } } };
 
 int selected_cells_array[8][3] = { { 1, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0 }, { 1, 0, 0 } };
 int selected_cells_count = 0;
+
 
 int hint_cells_count = 0;
 
@@ -46,22 +52,35 @@ GLfloat ORANGE[3] = { 1, 0.5, 0 };
 //Converts cell indexes into Window Coordinates. WORKS
 int* indexToCoordinate(int i, int j){
 	static int a[2]; //Static has to be used, as C does not advocate to return the address of a local variable to outside of the function.
-	a[0] = (i + 2) * grid_increment; //Gets bottom left corner of cell. Using +2, because window size magic.
-	a[1] = (j + 2) * grid_increment;
+	if (N == 8){
+		a[0] = (i + 2) * grid_increment; //Gets bottom left corner of cell. Using +2, because window size magic.
+		a[1] = (j + 2) * grid_increment;
+	}
+	if (N == 4){
+		a[0] = (i + 4) * grid_increment; //Gets bottom left corner of cell. Using +4, because window size magic.
+		a[1] = (j + 4) * grid_increment;
+	}
 	return a;
 }
 
 //Converts Window Coordinates to cell indexes.
 int* coordinateToIndex(int i, int j){
 	static int a[2]; //Static has to be used, as C does not advocate to return the address of a local variable to outside of the function.
-	a[0] = (i / grid_increment) - 2; //Gets bottom left corner of cell. Using -2, because window size magic.
-	a[1] = (j / grid_increment) - 2;
+	if (N == 8){
+		a[0] = (i / grid_increment) - 2; //Gets bottom left corner of cell. Using -2, because window size magic.
+		a[1] = (j / grid_increment) - 2;
+	}
+	if (N == 4){
+		a[0] = (i / grid_increment) - 4; //Gets bottom left corner of cell. Using -4, because window size magic.
+		a[1] = (j / grid_increment) - 4;
+	}
 	return a;
 }
 
 //Tells if input cell_i, cell_j belongs to the grid..
 int validCell(int cell_i, int cell_j){
-	if (cell_i >= 0 && cell_i < 8 && cell_j >= 0 && cell_j < 8){
+	//printf("In validCell(), i,j: %d,%d. Comparing in grid of size N = %d.\n", cell_i, cell_j, N);
+	if (cell_i >= 0 && cell_i < N && cell_j >= 0 && cell_j < N){
 		return 1;
 	}
 	else{
@@ -80,7 +99,7 @@ int CellinSelectedCells(int cell_i, int cell_j){
 }
 
 int arrayContains(int arr[8][2], int cell_i, int cell_j){
-	for (int k = 0; k < 8; k++){
+	for (int k = 0; k < N; k++){
 		if (arr[k][0] == cell_i && arr[k][1] == cell_j){
 			return 1;
 		}
@@ -100,7 +119,7 @@ int solutionContainsSelected(int k){
 
 //Tells if a solution is possible with the currently selected cells.
 int isSolutionPossible(){
-	for (int k = 0; k < 92; k++){
+	for (int k = 0; k < numberOfSolutions; k++){
 		if (solutionContainsSelected(k)){
 			return 1;
 		}
@@ -115,11 +134,12 @@ void drawline(int x1, int y1, int x2, int y2){
 	glVertex2i(x2, y2);
 	glEnd();
 }
-//Draws 8 by 8 grid.
+//Draws n by n grid.
 void drawgrid(){
 	glColor3f(0, 1, 0);
-	int grid_right = grid_left + (8 * grid_increment); //8 because of 8 x 8 grid.
-	int grid_top = grid_bottom + (8 * grid_increment);
+	//printf("Drawgrid(): Drawing grid at grid_left: %d, grid_bottom: %d, size %dx%d.\n", grid_left, grid_bottom, N, N);
+	int grid_right = grid_left + (N * grid_increment); //N because of N x N grid.
+	int grid_top = grid_bottom + (N * grid_increment);
 
 	for (int x = grid_left; x <= grid_right; x += grid_increment){
 		drawline(x, grid_bottom, x, grid_top);
@@ -145,8 +165,8 @@ void drawcell(int x, int y, GLfloat* color){
 
 //Highlights cell i,j on the grid. Maybe the checks here are redundant/ the checks must be handled even before calling this function.
 void highlightCellIndex(int cell_i, int cell_j, GLfloat* color){
-	int grid_right = grid_left + (8 * grid_increment);
-	int grid_top = grid_bottom + (8 * grid_increment);
+	int grid_right = grid_left + (N * grid_increment);
+	int grid_top = grid_bottom + (N * grid_increment);
 
 	//printf("HighlightCell(): Cell %d,%d ", cell_i, cell_j);
 
@@ -158,10 +178,11 @@ void highlightCellIndex(int cell_i, int cell_j, GLfloat* color){
 		drawcell(x, y, color);
 	}
 	else{
-		//printf("Cannot be highlighted!\n", x, y);
+		//printf("Cannot be highlighted!\n");
 	}
 
 }
+
 
 /******************************************************** CIRCULAR LINKED LIST SECTION *************************************************************/
 int solutionNodesCount = 0;
@@ -238,25 +259,27 @@ void findHints(){
 	}
 	/*Finding hints.*/
 	if (selected_cells_count > 0){
-		for (int k = 0; k < 92; k++){
+		for (int k = 0; k < numberOfSolutions; k++){
 			if (solutionContainsSelected(k)){
 				printf("The solution number %d contains currently selected.\n", k);
-				for (int i = 0; i < 8; i++){
+				for (int i = 0; i < N; i++){
 					if (!CellinSelectedCells(solutions[k][i][0], solutions[k][i][1])){
 						if (hintsList->cell_i == 10){
 							//Replace the initialization parameters.
+							//printf("Appending to hintsList, solutions[%d][%d][0,1]: %d,%d.\n", k, i, solutions[k][i][0], solutions[k][i][1]);
 							hintsList->cell_i = solutions[k][i][0];
 							hintsList->cell_j = solutions[k][i][1];
 						}
 						else{
+							//printf("Appending to hintsList, solutions[%d][%d][0,1]: %d,%d.\n", k,i, solutions[k][i][0], solutions[k][i][1]);
 							hintsList = hints_append(&hintsList, solutions[k][i][0], solutions[k][i][1]);
 						}
 					}
 				}
 			}
 		}
-
-		if (selected_cells_count < 8){
+		//hints_printList(&hintsList);
+		if (selected_cells_count < N){
 			highlightHints(&hintsList);
 		}
 	}
@@ -279,7 +302,7 @@ int* detectConflict(int conflict[], int cell_i, int cell_j){
 		}
 
 		/*Handle diagonal conflict along north east.*/
-		for (int i = 1; i < (8 - ((A>B) ? A : B)); i++){
+		for (int i = 1; i < (N - ((A>B) ? A : B)); i++){
 			if ((cell_i == (A + i)) && (cell_j == (B + i))){
 				conflict[0] = 1;
 				conflict[1] = A;
@@ -302,7 +325,7 @@ int* detectConflict(int conflict[], int cell_i, int cell_j){
 
 
 		if (A >= B){
-			for (int i = 1; i < 8 - A; i++){
+			for (int i = 1; i < N - A; i++){
 				if ((cell_i == (A + i)) && (cell_j == (B - i))){
 					conflict[0] = 1;
 					conflict[1] = A;
@@ -329,7 +352,7 @@ int* detectConflict(int conflict[], int cell_i, int cell_j){
 					return conflict;
 				}
 			}
-			for (int i = 1; i < 8 - B; i++){
+			for (int i = 1; i < N - B; i++){
 				if ((cell_i == (A - i)) && (cell_j == (B + i))){
 					conflict[0] = 1;
 					conflict[1] = A;
@@ -375,14 +398,14 @@ void addNewCelltoSelectedCells(int cell_i, int cell_j){
 	selected_cells_count++;
 
 	/*The following print can be removed.*/
-	
-	printf("In addnewcelltoselectedcells(), the selectedcells array is now:\n");
+
+	printf("The selectedcells array is now:\n");
 	for (int i = 0; i < selected_cells_count; i++){
 		printf("Show: %d\t i,j : %d,%d\n", selected_cells_array[i][0], selected_cells_array[i][1], selected_cells_array[i][2]);
 	}
 
 	printf("End of list.\n");
-	
+
 }
 //Can be used to set show or not using value = 1 or 0 respectively.
 void setSelected(int cell_i, int cell_j, int value){
@@ -393,7 +416,11 @@ void setSelected(int cell_i, int cell_j, int value){
 	}
 }
 
+
+
 /******************************************DISPLAYING SOLUTIONS******************************************************/
+
+
 void drawBackground(void){
 	glPushMatrix();
 	glLoadIdentity();
@@ -563,7 +590,7 @@ void displaySolution(){
 		break;
 
 	case FindHints:
-		if (selected_cells_count < 8){
+		if (selected_cells_count < N){
 			state = Wait;
 			queen_position_x = 0;
 			queen_position_y = 0;
@@ -578,17 +605,18 @@ void displaySolution(){
 		break;
 	}
 }
+
 /************************************************************** DISPLAY SECTION *******************************************************************/
 void display(void){
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0, 0, 0, 0);
+	glClearColor(0,0,0,0);
 
 	current_cell[0] = coordinateToIndex(mouse_x, mouse_y)[0];
 	current_cell[1] = coordinateToIndex(mouse_x, mouse_y)[1];
 	//printf("Display(): Current cell in display is: %d,%d\n", current_cell[0], current_cell[1]);
 	drawBackground();
 	displaySolution();
-	
+
 	glutSwapBuffers();
 
 }
@@ -614,46 +642,106 @@ void mouse(int button, int state, int x, int y){
 }
 
 
-void menu(int choice){
-	switch (choice){
+
+
+void reshape(int w, int h){
+	glutReshapeWindow(600, 600);
+}
+
+
+void reset(){
+	mouse_x = 0;
+	mouse_y = 0;
+	for (int i = 0; i < selected_cells_count; i++){
+		selected_cells_array[i][0] = 0;
+		selected_cells_array[i][1] = 0;
+		selected_cells_array[i][2] = 0;
+	}
+	selected_cells_count = 0;
+	current_cell[0] = 0;
+	current_cell[1] = 0;
+
+	newi = 0;
+	newj = 0;
+
+	queen_position_x = 0;
+	queen_position_y = 0;
+
+	target_position_x = 0;
+	target_position_y = 0;
+
+	conflictArray[0] = 0;
+	conflictArray[1] = 0;
+	conflictArray[2] = 0;
+
+	move_right = 1;
+	move_up = 0;
+
+	hint_cells_count = 0;
+
+	state = Wait;
+
+}
+
+void grid_menu_func(int choice){
+	//printf("In grid_menu_func, choice is: %d.", choice);
+	switch (choice)
+	{
 	case 1:
-		/*Reset the game.*/
-		printf("RESETTING!\n");
-		mouse_x = 0;
-		mouse_y = 0;
-		for (int i = 0; i < selected_cells_count; i++){
-			selected_cells_array[i][0] = 0;
-			selected_cells_array[i][1] = 0;
-			selected_cells_array[i][2] = 0;
-		}
-		selected_cells_count = 0;
-		current_cell[0] = 0;
-		current_cell[1] = 0;
+		/*Set 8 by 8 grid.*/
+		
+		printf("Setting up 8x8 grid!\n");
+		N = 8;
+		numberOfSolutions = 92;
 
-		newi = 0;
-		newj = 0;
-
-		queen_position_x = 0;
-		queen_position_y = 0;
-
-		target_position_x = 0; 
-		target_position_y = 0;
-
-		conflictArray[0] = 0;
-		conflictArray[1] = 0;
-		conflictArray[2] = 0;
-
-		move_right = 1;
-		move_up = 0;
-
-		hint_cells_count = 0;
-
-		state = Wait;
+		//Copy solutions_8 to solutions array.
+		printf("In setting up, sizeof solutions_8 is: %d\n", sizeof solutions_8);
+		memcpy(&solutions, &solutions_8, sizeof solutions_8);
+		
+		grid_bottom = 100;
+		grid_left = 100;
+		reset();
 		glutPostRedisplay();
 		break;
-	case 2: /*Undo selection.*/
-		if (selected_cells_count > 0 && selected_cells_count<8 ){
-			printf("Undoing selection! Cell %d,%d removed.\n",selected_cells_array[selected_cells_count - 1][1] ,selected_cells_array[selected_cells_count - 1][2]);
+	case 2:
+		/*Set 4 by 4 grid.*/
+		printf("Setting up 4x4 grid!\n");
+		
+		N = 4;
+		numberOfSolutions = 2;
+
+		//Copy solutions_4 to solutions array.
+		printf("In setting up, sizeof solutions_4 is: %d\n", sizeof solutions_4);
+
+		//Cannot use memcpy to copy here, because memcpy copies contiguous memory.
+		for (int i = 0; i < 2; i++){
+			for (int j = 0; j < 4; j++){
+				solutions[i][j][0] = solutions_4[i][j][0];
+				solutions[i][j][1] = solutions_4[i][j][1];
+			}
+		}
+
+		grid_bottom = 200;
+		grid_left = 200;
+		reset();
+		glutPostRedisplay();
+		break;
+	default:
+		break;
+	}
+}
+
+void menu_func(int choice){
+	switch (choice){
+	case 3:
+		/*Reset the game.*/
+		printf("RESETTING!\n");
+		reset();
+		glutPostRedisplay();
+		break;
+	case 4: /*Undo selection.*/
+		if (selected_cells_count > 0 && selected_cells_count<N){
+			printf("Undoing selection! Cell %d,%d removed.\n", selected_cells_array[selected_cells_count - 1][1], selected_cells_array[selected_cells_count - 1][2]);
 			selected_cells_array[selected_cells_count - 1][0] = 0;
 			selected_cells_array[selected_cells_count - 1][1] = 0;
 			selected_cells_array[selected_cells_count - 1][2] = 0;
@@ -668,27 +756,32 @@ void menu(int choice){
 }
 
 
-void reshape(int w, int h){
-	glutReshapeWindow(600, 600);
-}
-
 void main(int argc, char **argv){
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize(window_height, window_height);
-	glutCreateWindow("Queens"); 
+	glutCreateWindow("Queens");
 	glMatrixMode(GL_PROJECTION);
 	gluOrtho2D(0, window_height, 0, window_height);
 	glMatrixMode(GL_MODELVIEW);
-	glutCreateMenu(menu);
-	glutAddMenuEntry("Reset", 1);
-	glutAddMenuEntry("Undo", 2);
+
+	int grid_menu = glutCreateMenu(grid_menu_func);
+	glutAddMenuEntry("Eight-Queens", 1);
+	glutAddMenuEntry("Four-Queens", 2);
+
+	int main_menu = glutCreateMenu(menu_func);
+	glutAddSubMenu("Grid", grid_menu);
+	glutAddMenuEntry("Reset", 3);
+	glutAddMenuEntry("Undo", 4);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
+
+
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutMouseFunc(mouse);
 	glutMainLoop();
 }
+
 /*
 Todo: Rename list related variables.
 
@@ -712,7 +805,17 @@ moves over to the conflicting queen and kills it, and translates back to origina
 STAGE 2 COMPLETED!!!!!!!!!
 
 Stage 3:
-Implement the solutions for 8 queens and 4 queens by converting explict calculations related to '8', into general calculations, and integrate via menus.
+Implement the solutions for 8 queens and 4 queens by converting explict calculations related to '8', into general calculations,
+and integrate via menus. DONE.
+
 Change colors for grid. Make a chequered grid. Put in more colors. Maybe even set a background color. Choose an attractive color scheme. Add text to show
 current state of game.
+
+To do this, set a pointer to solutions_4, and solutions_8, and use whichever necessary. Also bind the pointer to max of 92 or 2.
+Create buttons on screen to choose.Catch option by click coordinates and find 8x8 or 4x4 board.
+There initialize the grid_left, grid_bottom, and solutions***. Find out how to set the triple pointer. Draw grid.
+Then go to wait state.
+
+Set a white background.
+
 */

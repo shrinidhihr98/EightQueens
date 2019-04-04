@@ -84,7 +84,7 @@
     <None Include="E:\solutions array generator.py" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="conflictResolver.c" />
+    <ClCompile Include="nqueens.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
