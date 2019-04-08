@@ -909,13 +909,7 @@ void grid_menu_func(int choice){
 
 void menu_func(int choice){
 	switch (choice){
-	case 3:
-		/*Reset the game.*/
-		printf("RESETTING!\n");
-		reset();
-		glutPostRedisplay();
-		break;
-	case 4: /*Undo selection.*/
+	case 3: /*Undo selection.*/
 		if (selected_cells_count > 0 && selected_cells_count<N){
 			printf("Undoing selection! Cell %d,%d removed.\n", selected_cells_array[selected_cells_count - 1][1], selected_cells_array[selected_cells_count - 1][2]);
 			selected_cells_array[selected_cells_count - 1][0] = 0;
@@ -924,6 +918,18 @@ void menu_func(int choice){
 			selected_cells_count--;
 			state = FindHints;
 		}
+		glutPostRedisplay();
+		break;
+
+	case 4:
+		/*Reset the game.*/
+		printf("RESETTING!\n");
+		reset();
+		glutPostRedisplay();
+		break;
+	case 5: /*Go to intro screen.*/
+		reset();
+		state = Intro;
 		glutPostRedisplay();
 		break;
 	default:
@@ -947,8 +953,9 @@ void main(int argc, char **argv){
 
 	int main_menu = glutCreateMenu(menu_func);
 	glutAddSubMenu("Grid", grid_menu);
-	glutAddMenuEntry("Reset", 3);
-	glutAddMenuEntry("Undo", 4);
+	glutAddMenuEntry("Undo", 3);
+	glutAddMenuEntry("Reset", 4);	
+	glutAddMenuEntry("Back", 5);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 
