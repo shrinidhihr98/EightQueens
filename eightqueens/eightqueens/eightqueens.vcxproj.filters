@@ -21,9 +21,6 @@
     <None Include="E:\solutions array generator.py" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="testing.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="appearance.c">
       <Filter>Source Files</Filter>
     </ClCompile>

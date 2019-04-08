@@ -2,6 +2,7 @@
 #include<GL/glut.h>
 #include<stdio.h>
 #include<string.h>
+#include<math.h>
 
 int window_height = 600;
 
@@ -38,8 +39,8 @@ int selected_cells_count = 0;
 
 int hint_cells_count = 0;
 
-typedef enum { Wait, Started, MoveNewRight, MoveNewUp, CheckConflict, MoveConflictHorizontal, MoveConflictVertical, MoveConflictHorizontalBack, MoveConflictVerticalBack, FindHints, Done } status;
-enum status state = Wait;
+typedef enum { Intro, Wait, Started, MoveNewRight, MoveNewUp, CheckConflict, MoveConflictHorizontal, MoveConflictVertical, MoveConflictHorizontalBack, MoveConflictVerticalBack, FindHints, Done } status;
+enum status state = Intro;
 
 /*Colors*/
 GLfloat RED[3] = { 1, 0, 0 };
@@ -128,6 +129,108 @@ int isSolutionPossible(){
 	}
 	return 0;
 }
+
+char* makePossibilitiesString(char* buffer, int possibleSolutionsCount){
+	char num[4] = "0";
+	_itoa_s(possibleSolutionsCount, num, 4, 10);
+	printf("Num char array is: %s\n", num);
+	char stringpart[30] = "Possible solutions: ";
+	unsigned int i = 0;
+	buffer = malloc(sizeof(char) * 100);
+	for (i = 0; i < strlen(stringpart); i++){
+		buffer[i] = stringpart[i];
+	}
+	printf("i is:%d\n", i);
+	if (possibleSolutionsCount < 10){
+		buffer[i] = num[0];
+		buffer[i + 1] = '\0';
+	}
+	else{
+		buffer[i] = num[0];
+		buffer[i + 1] = num[1];
+		buffer[i + 2] = '\0';
+	}
+	printf("%s\n", buffer);
+	return buffer;
+}
+
+void reset(){
+	mouse_x = 0;
+	mouse_y = 0;
+	for (int i = 0; i < selected_cells_count; i++){
+		selected_cells_array[i][0] = 0;
+		selected_cells_array[i][1] = 0;
+		selected_cells_array[i][2] = 0;
+	}
+	selected_cells_count = 0;
+	current_cell[0] = 0;
+	current_cell[1] = 0;
+
+	newi = 0;
+	newj = 0;
+
+	if (N == 8){
+		queen_position_x = 100;
+		queen_position_y = 100;
+	}
+	if (N == 4){
+		queen_position_x = 200;
+		queen_position_y = 200;
+	}
+
+
+	target_position_x = 0;
+	target_position_y = 0;
+
+	conflictArray[0] = 0;
+	conflictArray[1] = 0;
+	conflictArray[2] = 0;
+
+	move_right = 1;
+	move_up = 0;
+
+	hint_cells_count = 0;
+
+	state = Wait;
+
+}
+
+void setup8by8(){
+	printf("Setting up 8x8 grid!\n");
+	N = 8;
+	numberOfSolutions = 92;
+
+	//Copy solutions_8 to solutions array.
+	printf("In setting up, sizeof solutions_8 is: %d\n", sizeof solutions_8);
+	memcpy(&solutions, &solutions_8, sizeof solutions_8);
+
+	grid_bottom = 100;
+	grid_left = 100;
+	reset();
+}
+void setup4by4(){
+	printf("Setting up 4x4 grid!\n");
+
+	N = 4;
+	numberOfSolutions = 2;
+
+	//Copy solutions_4 to solutions array.
+	printf("In setting up, sizeof solutions_4 is: %d\n", sizeof solutions_4);
+
+	//Cannot use memcpy to copy here, because memcpy copies contiguous memory.
+	for (int i = 0; i < 2; i++){
+		for (int j = 0; j < 4; j++){
+			solutions[i][j][0] = solutions_4[i][j][0];
+			solutions[i][j][1] = solutions_4[i][j][1];
+		}
+	}
+
+	grid_bottom = 200;
+	grid_left = 200;
+	reset();
+}
+
+
 /******************************************************** DRAWING SECTION *************************************************************/
 //Takes in coordinate points, draws lines.
 void drawline(int x1, int y1, int x2, int y2){
@@ -238,6 +341,56 @@ void drawgrid(){
 	glEnd();
 }
 
+void drawString(char *a, int x, int y, GLfloat* color)
+{
+	glColor3fv(color);
+	glRasterPos2i(x, y);
+	for (int i = 0; a[i] != '\0'; i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, a[i]);
+}
+
+void drawCircle(float xc, float yc, float radius,GLfloat* color){
+	float angle = 0;
+	float x, y = 0;
+	glColor3fv(color);
+	glBegin(GL_POLYGON);
+	for (angle = 0; angle <= 100; angle += 0.2){
+		x = xc + radius*cos(angle);
+		y = yc + radius*sin(angle);
+		glVertex2f(x, y);
+	}
+	glEnd();
+}
+
+void drawButton(float posx, float posy, float width, float height,char *text, GLfloat* color){
+	glColor3fv(color);
+	glBegin(GL_POLYGON);
+	glVertex2f(posx, posy);
+	glVertex2f(posx + width, posy);
+	glVertex2f(posx + width, posy + height);
+	glVertex2f(posx, posy + height);
+	glEnd();
+
+	drawCircle(posx, posy + (height / 2), height / 2,color);
+	drawCircle(posx + width, posy + (height / 2), height / 2,color);
+
+	drawString(text, posx+width/8, posy+height/3, BLACK);
+}
+
+void drawIntro(){
+	char heading[] = "N-Queens Problem";
+	char content1[] = "To place N queens on a N by N chess board such that";
+	char content2[] = "no two queens have the same rows column or diagonal.";
+	char content3[] = "Please pick a board size:";
+	drawString(heading, 225, 450, BLACK);
+	drawString(content1, 80, 400, BLACK);
+	drawString(content2, 80, 380, BLACK);
+	drawString(content3, 80, 340, BLACK);
+	drawButton(260, 250, 80, 40, "8 by 8", LIGHT_BLUE);
+	drawButton(260, 200, 80, 40, "4 by 4", LIGHT_BLUE);
+}
+
+
 
 /******************************************************** CIRCULAR LINKED LIST SECTION *************************************************************/
 int solutionNodesCount = 0;
@@ -341,6 +494,10 @@ void findHints(){
 		if (selected_cells_count < N){
 			highlightHints(&hintsList);
 		}
+
+		char* buffer = "";
+		buffer = makePossibilitiesString(buffer, possibleSolutionsCount);
+		drawString(buffer, 50, 30,BLACK);
 
 	}
 }
@@ -489,6 +646,21 @@ void displaySolution(){
 	int array[3] = { 0, 0, 0 };
 	int* c = NULL;
 	switch (state){
+	case Intro: 
+		//printf("mouse x,y is %d,%d", mouse_x, mouse_y);
+		drawIntro();
+		if (mouse_x > 240 && mouse_x < 360 && mouse_y >250 && mouse_y <290 ){
+			setup8by8();
+			state = Wait;
+			glutPostRedisplay();
+		}
+		if (mouse_x > 240 && mouse_x < 360 && mouse_y >200 && mouse_y <240 ){
+			setup4by4();
+			state = Wait;
+			glutPostRedisplay();
+		}
+				
+		break;
 	case Wait:
 		printf("In state Wait, ");
 		if (validCell(current_cell[0], current_cell[1]))
@@ -674,9 +846,16 @@ void display(void){
 	current_cell[0] = coordinateToIndex(mouse_x, mouse_y)[0];
 	current_cell[1] = coordinateToIndex(mouse_x, mouse_y)[1];
 	//printf("Display(): Current cell in display is: %d,%d\n", current_cell[0], current_cell[1]);
-	drawgrid();
-	displaySolution();
-	showSelectedCells();
+	if (state == Intro){
+		//printf("Displaying intro.\n");
+		displaySolution();
+	}
+	else{
+		drawgrid();
+		displaySolution();
+		showSelectedCells();
+
+	}
 	glutSwapBuffers();
 
 }
@@ -709,88 +888,18 @@ void reshape(int w, int h){
 }
 
 
-void reset(){
-	mouse_x = 0;
-	mouse_y = 0;
-	for (int i = 0; i < selected_cells_count; i++){
-		selected_cells_array[i][0] = 0;
-		selected_cells_array[i][1] = 0;
-		selected_cells_array[i][2] = 0;
-	}
-	selected_cells_count = 0;
-	current_cell[0] = 0;
-	current_cell[1] = 0;
-
-	newi = 0;
-	newj = 0;
-
-	if (N == 8){
-		queen_position_x = 100;
-		queen_position_y = 100;
-	}
-	if (N == 4){
-		queen_position_x = 200;
-		queen_position_y = 200;
-	}
-
-
-	target_position_x = 0;
-	target_position_y = 0;
-
-	conflictArray[0] = 0;
-	conflictArray[1] = 0;
-	conflictArray[2] = 0;
-
-	move_right = 1;
-	move_up = 0;
-
-	hint_cells_count = 0;
-
-	state = Wait;
-
-}
-
 void grid_menu_func(int choice){
 	//printf("In grid_menu_func, choice is: %d.", choice);
 	switch (choice)
 	{
 	case 1:
 		/*Set 8 by 8 grid.*/
-
-		printf("Setting up 8x8 grid!\n");
-		N = 8;
-		numberOfSolutions = 92;
-
-		//Copy solutions_8 to solutions array.
-		printf("In setting up, sizeof solutions_8 is: %d\n", sizeof solutions_8);
-		memcpy(&solutions, &solutions_8, sizeof solutions_8);
-
-		grid_bottom = 100;
-		grid_left = 100;
-		reset();
+		setup8by8();	
 		glutPostRedisplay();
 		break;
 	case 2:
 		/*Set 4 by 4 grid.*/
-		printf("Setting up 4x4 grid!\n");
-
-		N = 4;
-		numberOfSolutions = 2;
-
-		//Copy solutions_4 to solutions array.
-		printf("In setting up, sizeof solutions_4 is: %d\n", sizeof solutions_4);
-
-		//Cannot use memcpy to copy here, because memcpy copies contiguous memory.
-		for (int i = 0; i < 2; i++){
-			for (int j = 0; j < 4; j++){
-				solutions[i][j][0] = solutions_4[i][j][0];
-				solutions[i][j][1] = solutions_4[i][j][1];
-			}
-		}
-
-		grid_bottom = 200;
-		grid_left = 200;
-		reset();
+		setup4by4();
 		glutPostRedisplay();
 		break;
 	default:
