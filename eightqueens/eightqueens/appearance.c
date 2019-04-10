@@ -275,10 +275,9 @@ void highlightCellIndex(int cell_i, int cell_j, GLfloat* color){
 
 }
 
-
-//Draws n by n grid.
-void drawgrid(){
-	glColor3f(0, 0, 0);
+//Draws n by n outline
+void drawOutline(){
+	glColor3fv(BLACK);
 	//printf("Drawgrid(): Drawing grid at grid_left: %d, grid_bottom: %d, size %dx%d.\n", grid_left, grid_bottom, N, N);
 	int grid_right = grid_left + (N * grid_increment); //N because of N x N grid.
 	int grid_top = grid_bottom + (N * grid_increment);
@@ -291,23 +290,29 @@ void drawgrid(){
 		drawline(grid_left, y, grid_right, y);
 	}
 
+}
+
+//Draws n by n grid.
+void drawgrid(){
+	glColor3fv(BLACK);
+	//printf("Drawgrid(): Drawing grid at grid_left: %d, grid_bottom: %d, size %dx%d.\n", grid_left, grid_bottom, N, N);
+	int grid_right = grid_left + (N * grid_increment); //N because of N x N grid.
+	int grid_top = grid_bottom + (N * grid_increment);
+
+	for (int x = grid_left; x <= grid_right; x += grid_increment){
+		drawline(x, grid_bottom, x, grid_top);
+	}
+
+	for (int y = grid_bottom; y <= grid_top; y += grid_increment){
+		drawline(grid_left, y, grid_right, y);
+	}
+
+	
 	for (int i = 0; i < N; i+=2){
 		for (int j = 0; j < N; j += 2){
-			if (!CellinSelectedCells(i, j)){
+			
 				highlightCellIndex(i, j, BLACK);
-			}
-			/*
-			if (!CellinSelectedCells(i+1,j)){
-				highlightCellIndex(i + 1, j, WHITE);				
-			}
-			if (!CellinSelectedCells(i,j+1)){
-				highlightCellIndex(i, j + 1, WHITE);
-			}
-			*/
-			if (!CellinSelectedCells(i+1, j+1)){
 				highlightCellIndex(i+1, j+1, BLACK);
-			}
-
 		}
 	}
 
@@ -339,6 +344,8 @@ void drawgrid(){
 	glVertex2i(grid_right+25, grid_top+25);
 	glVertex2i(grid_right+25, grid_top);
 	glEnd();
+
+
 }
 
 void drawString(char *a, int x, int y, GLfloat* color)
@@ -854,7 +861,7 @@ void display(void){
 		drawgrid();
 		displaySolution();
 		showSelectedCells();
-
+		drawOutline();
 	}
 	glutSwapBuffers();
 
@@ -998,4 +1005,5 @@ Add text to show current state of game.
 
 Set a white background. Make border. Done.
 
+Draw grid over the whole layer, so that it is visible over the whole thing.
 */
