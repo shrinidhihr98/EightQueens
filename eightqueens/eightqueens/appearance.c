@@ -195,6 +195,8 @@ void reset(){
 
 }
 
+
+
 void setup8by8(){
 	printf("Setting up 8x8 grid!\n");
 	N = 8;
@@ -207,6 +209,7 @@ void setup8by8(){
 	grid_bottom = 100;
 	grid_left = 100;
 	reset();
+
 }
 void setup4by4(){
 	printf("Setting up 4x4 grid!\n");
@@ -348,13 +351,6 @@ void drawgrid(){
 
 }
 
-void drawString(char *a, int x, int y, GLfloat* color)
-{
-	glColor3fv(color);
-	glRasterPos2i(x, y);
-	for (int i = 0; a[i] != '\0'; i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, a[i]);
-}
 
 void drawCircle(float xc, float yc, float radius,GLfloat* color){
 	float angle = 0;
@@ -368,6 +364,23 @@ void drawCircle(float xc, float yc, float radius,GLfloat* color){
 	}
 	glEnd();
 }
+
+void drawString(char *a, int x, int y, GLfloat* color)
+{
+	glColor3fv(color);
+	glRasterPos2i(x, y);
+	for (int i = 0; a[i] != '\0'; i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, a[i]);
+}
+
+void drawBigString(char *a, int x, int y, GLfloat* color)
+{
+	glColor3fv(color);
+	glRasterPos2i(x, y);
+	for (int i = 0; a[i] != '\0'; i++)
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, a[i]);
+}
+
 
 void drawButton(float posx, float posy, float width, float height,char *text, GLfloat* color){
 	glColor3fv(color);
@@ -862,6 +875,15 @@ void display(void){
 		displaySolution();
 		showSelectedCells();
 		drawOutline();
+		char* buffer;
+		if (N == 8){
+			buffer = "Eight Queens";
+		}
+		else{
+			buffer = "Four Queens";
+		}
+		drawBigString(buffer, 235, 560, BLACK);
+
 	}
 	glutSwapBuffers();
 
